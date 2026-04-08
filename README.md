@@ -2,6 +2,22 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.1.
 
+## MediFlow Frontend Structure
+
+The app is organized by feature and role:
+
+- `src/app/core`: auth store, route guard, HTTP interceptor
+- `src/app/shared/ui`: reusable UI primitives (cards, headers, badges, forms, states)
+- `src/app/layout`: global shell and top bar
+- `src/app/features/auth|patient|doctor|receptionist|admin|system`
+- `src/app/services`: typed API services for auth, appointments, slots, queue, and admin
+
+## Story Coverage Notes
+
+- Role-based lazy routes are enforced with `authGuard` + route `data.roles`.
+- Shared Tailwind/CSS utility classes in `src/styles.css` implement the MediFlow token system (`card-surface`, `glass-panel`, `btn-primary`, `input-ui`).
+- Story verification checklist lives in `src/app/features/system/story-verification-checklist.md`.
+
 ## Development server
 
 To start a local development server, run:
