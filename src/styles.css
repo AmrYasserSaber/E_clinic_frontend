@@ -1,5 +1,61 @@
 @import 'tailwindcss';
 
+@theme {
+  --color-primary-fixed: #40cef3;
+  --color-secondary: #006572;
+  --color-on-surface: #2c2f31;
+  --color-surface-tint: #006479;
+  --color-on-error-container: #570008;
+  --color-on-surface-variant: #595c5e;
+  --color-error-container: #fb5151;
+  --color-primary: #006479;
+  --color-tertiary-dim: #31555c;
+  --color-secondary-dim: #005863;
+  --color-secondary-fixed: #96e6f6;
+  --color-on-secondary: #d8f8ff;
+  --color-on-tertiary-fixed: #274b52;
+  --color-on-primary-fixed-variant: #004a5a;
+  --color-inverse-surface: #0b0f10;
+  --color-secondary-fixed-dim: #88d8e7;
+  --color-tertiary: #3d6168;
+  --color-primary-container: #40cef3;
+  --color-on-primary: #e0f6ff;
+  --color-background: #f5f7f9;
+  --color-tertiary-fixed: #cef5fd;
+  --color-surface-container-low: #eef1f3;
+  --color-surface-variant: #d9dde0;
+  --color-on-tertiary: #d9f8ff;
+  --color-surface-container: #e5e9eb;
+  --color-outline: #747779;
+  --color-on-tertiary-container: #3a5e65;
+  --color-on-secondary-container: #005560;
+  --color-error: #b31b25;
+  --color-surface-bright: #f5f7f9;
+  --color-surface-container-highest: #d9dde0;
+  --color-outline-variant: #abadaf;
+  --color-on-background: #2c2f31;
+  --color-inverse-on-surface: #9a9d9f;
+  --color-on-secondary-fixed-variant: #005f6b;
+  --color-tertiary-container: #cef5fd;
+  --color-on-primary-fixed: #002a34;
+  --color-surface: #f5f7f9;
+  --color-on-primary-container: #00414f;
+  --color-surface-container-high: #dfe3e6;
+  --color-inverse-primary: #40cef3;
+  --color-surface-dim: #d0d5d8;
+  --color-primary-fixed-dim: #28c0e4;
+  --color-primary-dim: #00576a;
+  --color-on-tertiary-fixed-variant: #45686f;
+  --color-on-secondary-fixed: #004049;
+  --color-on-error: #ffefee;
+  --color-tertiary-fixed-dim: #c0e6ee;
+  --color-error-dim: #9f0519;
+  --color-surface-container-lowest: #ffffff;
+  --color-secondary-container: #96e6f6;
+  --font-headline: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
   --mf-primary: #006479;
   --mf-primary-strong: #005569;
@@ -19,7 +75,13 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    sans-serif;
   color: var(--mf-text);
   background: var(--mf-bg);
 }
@@ -82,4 +144,26 @@ body {
   outline: none;
   border-color: color-mix(in srgb, var(--mf-primary) 40%, #d8e0e8);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--mf-primary) 20%, transparent);
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+  vertical-align: middle;
+}
+
+.neumorphic-card {
+  box-shadow:
+    -12px -12px 24px rgba(255, 255, 255, 0.9),
+    12px 12px 24px rgba(0, 0, 0, 0.04);
+}
+
+.neumorphic-inset {
+  box-shadow:
+    inset 4px 4px 8px rgba(0, 0, 0, 0.03),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.9);
 }

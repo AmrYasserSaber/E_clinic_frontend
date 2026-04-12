@@ -15,8 +15,10 @@ export interface AuthUser {
   role: UserRole;
 }
 
-export interface AuthResponse {
-  token: string;
+/** Normalized session after login / refresh / signup (frontend shape). */
+export interface AuthSessionPayload {
+  accessToken: string;
+  refreshToken: string;
   user: AuthUser;
 }
 
