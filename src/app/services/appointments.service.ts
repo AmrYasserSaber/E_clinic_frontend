@@ -35,6 +35,12 @@ export interface AppointmentApiDto {
 export class AppointmentsService {
   constructor(private readonly http: HttpClient) {}
 
+  get(id: string): Observable<Appointment> {
+    return this.http
+      .get<AppointmentApiDto>(`/api/appointments/${id}/`)
+      .pipe(map((row) => this.mapAppointment(row)));
+  }
+
   list(params?: Record<string, string | string[]>): Observable<Appointment[]> {
     let httpParams = new HttpParams();
     if (params) {

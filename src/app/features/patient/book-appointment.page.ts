@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { ToastService } from '../../core/toast/toast.service';
 import { SlotsService } from '../../services/slots.service';
@@ -19,9 +19,18 @@ type CalendarDay = {
   standalone: true,
   imports: [PageHeaderComponent],
   template: `
-    <app-page-header title="Book Appointment" subtitle="Choose a doctor, date, and slot from live availability." />
+    <app-page-header
+      [title]="isRescheduleMode ? 'Reschedule Appointment' : 'Book Appointment'"
+      [subtitle]="
+        isRescheduleMode
+          ? 'Pick a new date and time. Your visit stays with the same doctor unless you change availability elsewhere.'
+          : 'Choose a doctor, date, and slot from live availability.'
+      "
+    />
 
-    @if (!selectedDoctor) {
+    @if (isLoadingRescheduleInit) {
+      <div class="card-surface p-4 text-sm text-slate-600">Loading appointment...</div>
+    } @else if (!selectedDoctor) {
       <section class="card-surface mb-4 p-4">
         <p class="mb-2 text-sm font-medium text-slate-600">Find your specialist</p>
         <input
@@ -66,7 +75,9 @@ type CalendarDay = {
       }
     } @else {
       <section class="mb-4 flex items-center gap-3">
-        <button class="btn-secondary" type="button" (click)="backToDoctors()">Back</button>
+        <button class="btn-secondary" type="button" (click)="backToDoctors()">
+          {{ isRescheduleMode ? 'Back to appointments' : 'Back' }}
+        </button>
         <div class="card-surface flex-1 p-4">
           <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
             {{ selectedDoctor.specialty || 'General Practitioner' }}
@@ -166,7 +177,15 @@ type CalendarDay = {
             <p class="text-sm font-bold text-slate-900">{{ humanDate(selectedDate) }} - {{ displayTime(selectedSlot.startTime) }}</p>
           </div>
           <button class="btn-primary" type="button" [disabled]="isBooking" (click)="bookSelectedSlot()">
-            {{ isBooking ? 'Booking...' : 'Book Appointment' }}
+            {{
+              isBooking
+                ? isRescheduleMode
+                  ? 'Rescheduling...'
+                  : 'Booking...'
+                : isRescheduleMode
+                  ? 'Confirm new time'
+                  : 'Book Appointment'
+            }}
           </button>
         </div>
       </section>
@@ -179,12 +198,16 @@ export class BookAppointmentPage implements OnInit {
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly weekdays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
   protected readonly today = this.stripTime(new Date());
 
   protected doctors: DoctorAvailability[] = [];
   protected searchTerm = '';
+  protected isRescheduleMode = false;
+  protected rescheduleAppointmentId: string | null = null;
+  protected isLoadingRescheduleInit = false;
   protected selectedDoctor: DoctorAvailability | null = null;
   protected selectedDate = '';
   protected selectedSlot: Slot | null = null;
@@ -196,7 +219,12 @@ export class BookAppointmentPage implements OnInit {
   protected isBooking = false;
 
   ngOnInit(): void {
-    this.loadDoctors();
+    const rid = this.route.snapshot.queryParamMap.get('rescheduleId');
+    if (rid) {
+      this.initRescheduleMode(rid);
+    } else {
+      this.loadDoctors();
+    }
   }
 
   protected get filteredDoctors(): DoctorAvailability[] {
@@ -249,6 +277,10 @@ export class BookAppointmentPage implements OnInit {
   }
 
   protected backToDoctors(): void {
+    if (this.isRescheduleMode) {
+      void this.router.navigate(['/patient/appointments']);
+      return;
+    }
     this.selectedDoctor = null;
     this.selectedDate = '';
     this.selectedSlot = null;
@@ -277,23 +309,34 @@ export class BookAppointmentPage implements OnInit {
     if (!this.selectedDoctor || !this.selectedSlot || !this.selectedDate) return;
 
     this.isBooking = true;
-    this.appointmentsService
-      .book({
-        doctor_id: this.selectedDoctor.id,
-        date: this.selectedDate,
-        time: this.selectedSlot.startTime,
-        reason: 'Consultation',
-      })
-      .pipe(finalize(() => (this.isBooking = false)))
-      .subscribe({
-        next: () => {
-          this.toast.success('Appointment booked successfully.');
-          this.router.navigate(['/patient/appointments']);
-        },
-        error: (error: HttpErrorResponse) => {
-          this.toast.error(this.extractErrorMessage(error), 'Booking failed');
-        },
-      });
+    const req = this.isRescheduleMode && this.rescheduleAppointmentId
+      ? this.appointmentsService.reschedule(this.rescheduleAppointmentId, {
+          doctor_id: this.selectedDoctor.id,
+          date: this.selectedDate,
+          time: this.selectedSlot.startTime,
+          reason: 'Rescheduled by patient',
+        })
+      : this.appointmentsService.book({
+          doctor_id: this.selectedDoctor.id,
+          date: this.selectedDate,
+          time: this.selectedSlot.startTime,
+          reason: 'Consultation',
+        });
+
+    req.pipe(finalize(() => (this.isBooking = false))).subscribe({
+      next: () => {
+        this.toast.success(
+          this.isRescheduleMode ? 'Appointment rescheduled.' : 'Appointment booked successfully.',
+        );
+        void this.router.navigate(['/patient/appointments']);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.toast.error(
+          this.extractErrorMessage(error),
+          this.isRescheduleMode ? 'Reschedule failed' : 'Booking failed',
+        );
+      },
+    });
   }
 
   protected displayTime(time: string): string {
@@ -315,6 +358,39 @@ export class BookAppointmentPage implements OnInit {
     if (status === 'AVAILABLE') return 'Available';
     if (status === 'BUSY') return 'Busy';
     return 'Away';
+  }
+
+  private initRescheduleMode(appointmentId: string): void {
+    this.isRescheduleMode = true;
+    this.rescheduleAppointmentId = appointmentId;
+    this.isLoadingRescheduleInit = true;
+    this.appointmentsService
+      .get(appointmentId)
+      .pipe(finalize(() => (this.isLoadingRescheduleInit = false)))
+      .subscribe({
+        next: (appt) => {
+          if (appt.status !== 'REQUESTED' && appt.status !== 'CONFIRMED') {
+            this.toast.error('This appointment cannot be rescheduled.');
+            void this.router.navigate(['/patient/appointments']);
+            return;
+          }
+          this.selectedDoctor = {
+            id: appt.doctor.id,
+            name: appt.doctor.fullName,
+            specialty: appt.doctor.specialty?.trim() ? appt.doctor.specialty : undefined,
+            status: 'AVAILABLE',
+          };
+          this.selectedDate = appt.date;
+          const [y, m, d] = appt.date.split('-').map((part) => Number(part));
+          this.viewMonth = new Date(y, (m || 1) - 1, d || 1);
+          this.selectedSlot = null;
+          this.loadSlots();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.toast.error(this.extractErrorMessage(error), 'Could not load appointment');
+          void this.router.navigate(['/patient/appointments']);
+        },
+      });
   }
 
   private loadDoctors(): void {
