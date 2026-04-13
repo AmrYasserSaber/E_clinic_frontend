@@ -13,10 +13,17 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { ToastService } from '../../core/toast/toast.service';
+import { ConsultationModalComponent } from './consultation-modal.component';
 
 @Component({
   standalone: true,
-  imports: [ReactiveFormsModule, PageHeaderComponent, StatusBadgeComponent, EmptyStateComponent],
+  imports: [
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    StatusBadgeComponent,
+    EmptyStateComponent,
+    ConsultationModalComponent,
+  ],
   template: `
     <app-page-header
       title="Doctor Dashboard"
@@ -83,6 +90,14 @@ import { ToastService } from '../../core/toast/toast.service';
                     }
 
                     @if (item.status === 'CHECKED_IN') {
+                      <button
+                        class="btn-primary"
+                        type="button"
+                        [disabled]="isActionBusy(item.id)"
+                        (click)="openConsultationModal(item)"
+                      >
+                        Complete Consultation
+                      </button>
                       <button
                         class="btn-secondary"
                         type="button"
@@ -186,6 +201,17 @@ import { ToastService } from '../../core/toast/toast.service';
         </div>
       </div>
     }
+
+    @if (consultationTarget()) {
+      <div class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/40 p-4">
+        <app-consultation-modal
+          [appointmentId]="consultationTarget()!.id"
+          [patientName]="consultationTarget()!.patient_full_name"
+          (closed)="closeConsultationModal()"
+          (success)="handleConsultationSuccess($event)"
+        />
+      </div>
+    }
   `,
 })
 export class DoctorDashboardComponent {
@@ -202,6 +228,7 @@ export class DoctorDashboardComponent {
   protected readonly upcomingError = signal('');
   protected readonly declineTarget = signal<DoctorQueueItem | null>(null);
   protected readonly noShowTarget = signal<DoctorQueueItem | null>(null);
+  protected readonly consultationTarget = signal<DoctorQueueItem | null>(null);
   protected readonly declineReason = new FormControl('', { nonNullable: true });
   protected readonly actionBusyIds = signal<Set<number>>(new Set<number>());
 
@@ -277,6 +304,21 @@ export class DoctorDashboardComponent {
 
   protected closeNoShowDialog(): void {
     this.noShowTarget.set(null);
+  }
+
+  protected openConsultationModal(item: DoctorQueueItem): void {
+    this.consultationTarget.set(item);
+  }
+
+  protected closeConsultationModal(): void {
+    this.consultationTarget.set(null);
+  }
+
+  protected handleConsultationSuccess(updated: DoctorAppointment): void {
+    this.patchQueueStatus(updated.id, updated.status);
+    this.closeConsultationModal();
+    this.toast.success('Consultation completed.');
+    this.loadUpcomingAppointments();
   }
 
   protected submitNoShow(): void {
