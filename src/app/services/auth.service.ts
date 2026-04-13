@@ -160,10 +160,21 @@ export class AuthService {
         chunks.push(val);
       }
     };
+    const passwordChunks: string[] = [];
+    const pushPasswordVal = (val: unknown): void => {
+      if (Array.isArray(val)) {
+        passwordChunks.push(...val.map((x) => String(x)));
+      } else if (typeof val === 'string') {
+        passwordChunks.push(val);
+      }
+    };
+    pushPasswordVal(record['password']);
+    if (passwordChunks.length > 0) {
+      return passwordChunks.join('\n');
+    }
     pushVal(record['non_field_errors']);
     const fieldOrder = [
       'email',
-      'password',
       'first_name',
       'last_name',
       'phone_number',
@@ -177,6 +188,9 @@ export class AuthService {
       if (key === 'non_field_errors' || fieldOrder.includes(key)) {
         continue;
       }
+      if (key === 'password') {
+        continue;
+      }
       if (key === 'detail') {
         continue;
       }
@@ -186,7 +200,7 @@ export class AuthService {
       chunks.push(record['detail']);
     }
     if (chunks.length > 0) {
-      return chunks.slice(0, 4).join(' ');
+      return chunks.join('\n');
     }
     return 'Registration failed. Check your details and try again.';
   }

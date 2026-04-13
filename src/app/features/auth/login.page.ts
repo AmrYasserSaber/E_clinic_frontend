@@ -163,7 +163,7 @@ const REMEMBER_EMAIL_KEY = 'mediflow_remember_email';
                   routerLink="/auth/register"
                   class="text-secondary hover:text-primary ml-1 font-bold transition-colors"
                 >
-                  Request access
+                  Create new account
                 </a>
               </p>
             </div>
