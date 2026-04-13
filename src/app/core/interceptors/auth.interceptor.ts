@@ -7,7 +7,8 @@ function skipsAttachBearer(url: string): boolean {
   return (
     u.includes('/api/auth/login/') ||
     u.includes('/api/auth/signup/') ||
-    u.includes('/api/auth/refresh/')
+    u.includes('/api/auth/refresh/') ||
+    u.includes('/api/auth/set-password-otp/')
   );
 }
 
