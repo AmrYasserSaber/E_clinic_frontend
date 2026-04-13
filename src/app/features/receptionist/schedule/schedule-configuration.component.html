@@ -1,0 +1,184 @@
+<main class="pt-24 px-6 w-full space-y-8 bg-surface font-body text-on-surface min-h-screen pb-24">
+  @if (vm$ | async; as vm) {
+    @if (vm.toast) {
+      <div
+        class="fixed top-20 right-6 z-50 px-4 py-3 rounded-xl bg-primary text-white neumorphic-card"
+      >
+        {{ vm.toast }}
+      </div>
+    }
+
+    <section class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div class="space-y-1">
+        <h1 class="text-4xl font-headline font-extrabold tracking-tight text-on-surface">
+          Schedule Management
+        </h1>
+        <p class="text-on-surface-variant font-medium">
+          Configure weekly availability and session parameters for medical staff.
+        </p>
+      </div>
+
+      <div class="w-full md:w-80">
+        <label class="block text-xs font-bold uppercase tracking-wider text-primary mb-2 px-1"
+          >Select Practitioner</label
+        >
+        <div class="relative group">
+          <select
+            title="Select practitioner"
+            [formControl]="form.controls.doctorId"
+            class="w-full h-14 bg-surface-container-low neumorphic-inset border-none rounded-2xl px-5 appearance-none focus:ring-2 focus:ring-primary/40 transition-all font-semibold"
+          >
+            @for (doctor of vm.doctors; track doctor.id) {
+              <option [ngValue]="doctor.id">
+                {{ doctor.name }} ({{ doctor.specialty || 'General' }})
+              </option>
+            }
+          </select>
+          <span
+            class="material-symbols-outlined absolute right-4 top-4 text-primary pointer-events-none"
+            >expand_more</span
+          >
+        </div>
+      </div>
+    </section>
+
+    @if (vm.error) {
+      <div class="rounded-xl p-4 bg-error-container text-on-error-container">{{ vm.error }}</div>
+    }
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div class="lg:col-span-8 space-y-6">
+        <div class="bg-surface-container-lowest neumorphic-card rounded-4xl p-8">
+          <div class="flex items-center justify-between mb-8">
+            <h2 class="text-xl font-headline font-bold text-on-surface">Weekly Availability</h2>
+            <span
+              class="px-3 py-1 bg-tertiary-container text-on-tertiary-container rounded-full text-xs font-bold"
+              >ACTIVE SCHEDULE</span
+            >
+          </div>
+
+          @if (vm.loading) {
+            <div class="space-y-3">
+              @for (s of [1, 2, 3, 4, 5, 6, 7]; track s) {
+                <div class="h-16 rounded-2xl bg-surface-container animate-pulse"></div>
+              }
+            </div>
+          } @else {
+            <div class="space-y-4" [formGroup]="form">
+              <div formArrayName="days">
+                @for (day of daysArray.controls; track day.controls.day_of_week.value) {
+                  <div
+                    [formGroupName]="$index"
+                    class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-center p-4 rounded-2xl transition-colors"
+                    [ngClass]="
+                      day.controls.is_working_day.value
+                        ? 'hover:bg-surface-container'
+                        : 'bg-surface-container/30 opacity-60'
+                    "
+                  >
+                    <div class="xl:col-span-2">
+                      <span class="font-bold text-on-surface">{{ dayNames[$index] }}</span>
+                    </div>
+
+                    <div
+                      class="xl:col-span-5 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 min-w-0"
+                    >
+                      <input
+                        title="Start time"
+                        class="w-full min-w-0 neumorphic-inset border-none rounded-xl h-10 px-3 text-sm focus:ring-2 focus:ring-primary/20"
+                        type="time"
+                        formControlName="start_time"
+                      />
+                      <span class="text-outline-variant">to</span>
+                      <input
+                        title="End time"
+                        class="w-full min-w-0 neumorphic-inset border-none rounded-xl h-10 px-3 text-sm focus:ring-2 focus:ring-primary/20"
+                        type="time"
+                        formControlName="end_time"
+                      />
+                    </div>
+
+                    <div class="xl:col-span-2">
+                      <select
+                        title="Session duration"
+                        class="w-full neumorphic-inset border-none rounded-xl h-10 px-3 text-sm focus:ring-2 focus:ring-primary/20"
+                        formControlName="session_duration_minutes"
+                      >
+                        @for (d of durations; track d) {
+                          <option [ngValue]="d">{{ d }} mins</option>
+                        }
+                      </select>
+                    </div>
+
+                    <div class="xl:col-span-2">
+                      <select
+                        title="Buffer minutes"
+                        class="w-full neumorphic-inset border-none rounded-xl h-10 px-3 text-sm focus:ring-2 focus:ring-primary/20"
+                        formControlName="buffer_minutes"
+                      >
+                        @for (b of buffers; track b) {
+                          <option [ngValue]="b">Buffer {{ b }}m</option>
+                        }
+                      </select>
+                    </div>
+
+                    <div class="xl:col-span-1 flex justify-end">
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input
+                          title="Toggle working day"
+                          class="sr-only peer"
+                          type="checkbox"
+                          formControlName="is_working_day"
+                        />
+                        <div
+                          class="w-11 h-6 bg-surface-container-high rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-primary after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"
+                        ></div>
+                      </label>
+                    </div>
+
+                    @if (
+                      day.controls.is_working_day.value &&
+                      day.controls.end_time.value <= day.controls.start_time.value
+                    ) {
+                      <div class="md:col-span-12 text-xs text-error font-semibold">
+                        End time must be later than start time.
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="mt-10 flex justify-end gap-4">
+            <button
+              type="button"
+              class="px-8 py-3 rounded-full font-bold text-primary hover:bg-surface transition-all"
+              (click)="cancelChanges()"
+              [disabled]="vm.saving"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="px-8 py-3 rounded-full font-bold text-white bg-linear-to-br from-[#006479] to-[#00B4D8] shadow-lg shadow-cyan-900/20 active:scale-95 transition-all disabled:opacity-60"
+              (click)="save()"
+              [disabled]="vm.saving || vm.loading"
+            >
+              {{ vm.saving ? 'Saving...' : 'Save Changes' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-4 space-y-6">
+        <div class="bg-surface-container-lowest neumorphic-card rounded-4xl p-6">
+          <h3 class="text-lg font-headline font-bold text-on-surface mb-6">Slot Density Preview</h3>
+          <div class="p-4 bg-tertiary-container/30 rounded-2xl text-xs text-on-tertiary-container">
+            Preview updates as you edit weekly schedule settings.
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</main>

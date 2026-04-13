@@ -1,0 +1,169 @@
+<main class="pt-24 px-6 w-full space-y-8 bg-surface font-body text-on-surface min-h-screen pb-24">
+  @if (vm$ | async; as vm) {
+    <section class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div class="space-y-1">
+        <h1 class="text-4xl font-headline font-extrabold tracking-tight">Schedule Exceptions</h1>
+        <p class="text-on-surface-variant font-medium">
+          Manage day-off and one-off custom working days.
+        </p>
+      </div>
+
+      <div class="w-full md:w-80">
+        <label class="block text-xs font-bold uppercase tracking-wider text-primary mb-2 px-1"
+          >Select Practitioner</label
+        >
+        <select
+          title="Select practitioner"
+          class="w-full h-14 bg-surface-container-low neumorphic-inset border-none rounded-2xl px-5 font-semibold"
+          [value]="vm.selectedDoctor || ''"
+          (change)="onDoctorChange($any($event.target).value)"
+        >
+          @for (doctor of vm.doctors; track doctor.id) {
+            <option [value]="doctor.id">{{ doctor.name }}</option>
+          }
+        </select>
+      </div>
+    </section>
+
+    @if (vm.error) {
+      <div class="rounded-xl p-4 bg-error-container text-on-error-container">{{ vm.error }}</div>
+    }
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div class="lg:col-span-7 bg-surface-container-lowest neumorphic-card rounded-4xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-headline font-bold">Monthly Calendar</h3>
+          <button
+            class="px-4 py-2 rounded-xl bg-primary text-white font-semibold"
+            (click)="openModal()"
+          >
+            Add Exception
+          </button>
+        </div>
+
+        <div class="grid grid-cols-7 gap-2">
+          @for (d of monthDays(); track d) {
+            <div class="h-16 rounded-xl text-xs p-2" [ngClass]="dayClass(d, vm.exceptions)">
+              <div class="font-bold">{{ d | date: 'd' }}</div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 bg-surface-container-lowest neumorphic-card rounded-4xl p-6">
+        <h3 class="text-lg font-headline font-bold mb-4">Exceptions List</h3>
+
+        @if (vm.loading) {
+          <div class="space-y-2">
+            @for (x of [1, 2, 3]; track x) {
+              <div class="h-12 rounded-xl bg-surface-container animate-pulse"></div>
+            }
+          </div>
+        } @else if (!vm.exceptions.length) {
+          <div class="text-on-surface-variant text-sm">No exceptions configured yet.</div>
+        } @else {
+          <div class="space-y-3">
+            @for (e of vm.exceptions; track e.id) {
+              <div
+                class="p-3 rounded-xl bg-surface-container-low flex items-center justify-between"
+              >
+                <div>
+                  <div class="font-semibold">
+                    {{ e.exception_type === 'DAY_OFF' ? 'Day Off' : 'Custom Working Day' }}
+                  </div>
+                  <div class="text-xs text-on-surface-variant">
+                    {{ e.start_date }}
+                    @if (e.end_date && e.end_date !== e.start_date) {
+                      - {{ e.end_date }}
+                    }
+                    @if (e.custom_start_time && e.custom_end_time) {
+                      • {{ e.custom_start_time }} - {{ e.custom_end_time }}
+                    }
+                  </div>
+                </div>
+                <button
+                  class="p-2 rounded-lg text-error hover:bg-error-container/20"
+                  (click)="deleteException(e.id)"
+                >
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (vm.showModal) {
+      <div class="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4">
+        <div
+          class="w-full max-w-lg bg-surface-container-lowest rounded-2xl p-6 neumorphic-card"
+          [formGroup]="exceptionForm"
+        >
+          <h4 class="text-xl font-headline font-bold mb-4">Add Exception</h4>
+
+          <div class="space-y-4">
+            <select
+              title="Exception type"
+              class="w-full h-11 rounded-xl neumorphic-inset border-none px-3"
+              formControlName="exception_type"
+            >
+              <option value="DAY_OFF">Day Off</option>
+              <option value="CUSTOM_WORKING_DAY">One-Off Working Day</option>
+            </select>
+
+            <div class="grid grid-cols-2 gap-3">
+              <input
+                title="Start date"
+                class="h-11 rounded-xl neumorphic-inset border-none px-3"
+                type="date"
+                formControlName="start_date"
+              />
+              <input
+                title="End date"
+                class="h-11 rounded-xl neumorphic-inset border-none px-3"
+                type="date"
+                formControlName="end_date"
+              />
+            </div>
+
+            @if (exceptionForm.controls.exception_type.value === 'CUSTOM_WORKING_DAY') {
+              <div class="grid grid-cols-2 gap-3">
+                <input
+                  title="Custom start time"
+                  class="h-11 rounded-xl neumorphic-inset border-none px-3"
+                  type="time"
+                  formControlName="custom_start_time"
+                />
+                <input
+                  title="Custom end time"
+                  class="h-11 rounded-xl neumorphic-inset border-none px-3"
+                  type="time"
+                  formControlName="custom_end_time"
+                />
+              </div>
+            }
+
+            <textarea
+              class="w-full rounded-xl neumorphic-inset border-none px-3 py-2"
+              rows="3"
+              placeholder="Reason"
+              formControlName="reason"
+            ></textarea>
+          </div>
+
+          <div class="mt-6 flex justify-end gap-3">
+            <button class="px-4 py-2 rounded-xl border" (click)="closeModal()">Cancel</button>
+            <button
+              class="px-4 py-2 rounded-xl bg-primary text-white"
+              [disabled]="vm.saving"
+              (click)="saveException()"
+            >
+              {{ vm.saving ? 'Saving...' : 'Save' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</main>

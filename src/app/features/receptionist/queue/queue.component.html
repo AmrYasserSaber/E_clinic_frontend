@@ -1,0 +1,74 @@
+<main
+  class="flex-1 p-6 md:p-10 w-full bg-background font-body text-on-surface selection:bg-primary/20"
+>
+  @if (vm$ | async; as vm) {
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+      <div class="max-w-xl">
+        <span class="text-primary font-bold text-sm uppercase tracking-widest font-label mb-2 block"
+          >Clinical Operations</span
+        >
+        <h1
+          class="text-4xl md:text-5xl font-extrabold font-headline text-on-surface tracking-tight leading-tight"
+        >
+          Patient Queue <span class="text-primary">Management</span>
+        </h1>
+        <p class="text-on-surface-variant mt-4 text-lg leading-relaxed">
+          Oversee daily check-ins, coordinate patient flow, and manage provider availability from a
+          single tactical dashboard.
+        </p>
+      </div>
+      <div class="flex gap-3">
+        <div
+          class="soft-neumorphic bg-surface-container-lowest p-4 rounded-xl flex items-center gap-4 border border-primary/5"
+        >
+          <div class="h-12 w-12 rounded-full bg-primary-container flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary">group_add</span>
+          </div>
+          <div>
+            <p class="text-xs text-on-surface-variant font-label uppercase">In Waiting Room</p>
+            <p class="text-2xl font-bold font-headline text-on-surface">
+              {{ vm.waitingCount }} Patients
+            </p>
+            <p class="text-[10px] text-on-surface-variant">
+              Last updated {{ vm.lastUpdated ? (vm.lastUpdated | date: 'shortTime') : '--' }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-8">
+      <div class="space-y-6">
+        <div class="flex items-center justify-between px-2">
+          <h3 class="text-xl font-bold font-headline flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">list_alt</span>
+            Today's Appointments
+          </h3>
+          <app-queue-filters [activeFilter]="vm.filter" (change)="onFilterChange($event)" />
+        </div>
+
+        @if (vm.loading) {
+          <div class="soft-neumorphic bg-surface-container-lowest rounded-xl p-6">
+            Loading queue...
+          </div>
+        } @else if (vm.error) {
+          <div class="rounded-xl p-4 bg-error-container text-on-error-container">
+            {{ vm.error }}
+          </div>
+        } @else if (!vm.list.length) {
+          <div
+            class="soft-neumorphic bg-surface-container-lowest rounded-xl p-6 text-on-surface-variant"
+          >
+            No patients in queue.
+          </div>
+        } @else {
+          <app-queue-list
+            [items]="vm.list"
+            (checkIn)="onCheckIn($event)"
+            (noShow)="onNoShow($event)"
+          />
+        }
+      </div>
+    </div>
+  }
+</main>

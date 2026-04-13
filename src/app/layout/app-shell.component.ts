@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { AppTopbarComponent } from './app-topbar.component';
 
 @Component({
@@ -7,12 +7,14 @@ import { AppTopbarComponent } from './app-topbar.component';
   standalone: true,
   imports: [RouterOutlet, AppTopbarComponent],
   template: `
-    <div class="min-h-screen bg-[var(--mf-bg)] p-4 md:p-6">
+    <div class="min-h-screen bg-(--mf-bg) p-4 md:p-6">
       <app-topbar />
-      <main class="mx-auto max-w-6xl">
+      <main [class]="router.url.startsWith('/receptionist') ? 'max-w-none' : 'mx-auto max-w-6xl'">
         <router-outlet />
       </main>
     </div>
-  `
+  `,
 })
-export class AppShellComponent {}
+export class AppShellComponent {
+  constructor(public readonly router: Router) {}
+}
