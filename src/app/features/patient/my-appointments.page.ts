@@ -107,21 +107,26 @@ type AppointmentTab = 'upcoming' | 'past' | 'cancelled';
               }
 
               <div class="flex gap-3">
-                @if (canModify(appt)) {
-                  <a
-                    routerLink="/patient/book"
-                    class="min-w-0 flex-1 rounded-xl bg-slate-100 py-3 text-center text-sm font-bold text-slate-900 no-underline transition hover:bg-slate-200"
-                  >
-                    Reschedule
-                  </a>
-                  <button
-                    type="button"
-                    class="min-w-0 flex-1 rounded-xl bg-slate-100 py-3 text-sm font-bold text-slate-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
-                    [disabled]="cancellingId === appt.id"
-                    (click)="cancelAppointment(appt)"
-                  >
-                    {{ cancellingId === appt.id ? 'Cancelling...' : 'Cancel' }}
-                  </button>
+                @if (canReschedule(appt) || canCancel(appt)) {
+                  @if (canReschedule(appt)) {
+                    <a
+                      [routerLink]="['/patient/book']"
+                      [queryParams]="{ rescheduleId: appt.id }"
+                      class="min-w-0 flex-1 rounded-xl bg-slate-100 py-3 text-center text-sm font-bold text-slate-900 no-underline transition hover:bg-slate-200"
+                    >
+                      Reschedule
+                    </a>
+                  }
+                  @if (canCancel(appt)) {
+                    <button
+                      type="button"
+                      class="min-w-0 flex-1 rounded-xl bg-slate-100 py-3 text-sm font-bold text-slate-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
+                      [disabled]="cancellingId === appt.id"
+                      (click)="cancelAppointment(appt)"
+                    >
+                      {{ cancellingId === appt.id ? 'Cancelling...' : 'Cancel' }}
+                    </button>
+                  }
                 } @else {
                   <span class="min-w-0 flex-1 text-sm text-slate-400">No actions for this visit.</span>
                 }
@@ -199,8 +204,12 @@ export class MyAppointmentsPage implements OnInit {
       });
   }
 
-  protected canModify(appt: Appointment): boolean {
-    return ['REQUESTED', 'CONFIRMED', 'CHECKED_IN'].includes(appt.status);
+  protected canReschedule(appt: Appointment): boolean {
+    return appt.status === 'REQUESTED' || appt.status === 'CONFIRMED';
+  }
+
+  protected canCancel(appt: Appointment): boolean {
+    return appt.status === 'REQUESTED' || appt.status === 'CONFIRMED';
   }
 
   protected statusLabel(status: AppointmentStatus): string {
