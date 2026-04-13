@@ -12,6 +12,7 @@ import { AuthService } from '../../services/auth.service';
 import { AuthStore } from '../../core/auth/auth.store';
 import { ToastService } from '../../core/toast/toast.service';
 import { UserRole } from '../../models/domain.models';
+import { AuthValidators } from './auth.validators';
 
 type SignupRole = 'patient' | 'doctor' | 'receptionist';
 
@@ -51,7 +52,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
             <h1
               class="font-headline text-primary mb-2 text-2xl font-extrabold tracking-tight md:text-3xl"
             >
-              Request access
+              Create new account
             </h1>
             <p class="text-on-surface-variant text-sm font-medium">
               Create your MediFlow account. Staff roles need admin approval before you can sign in.
@@ -214,7 +215,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                     formControlName="password"
                     [type]="showPassword() ? 'text' : 'password'"
                     autocomplete="new-password"
-                    placeholder="At least 6 characters"
+                    placeholder="At least 8 characters"
                     class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-11 pl-11 transition-all focus:ring-2"
                   />
                   <button
@@ -228,6 +229,32 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                     }}</span>
                   </button>
                 </div>
+                @if (
+                  form.controls.password.touched && form.controls.password.errors?.['minlength']
+                ) {
+                  <p class="text-error ml-1 text-xs font-medium">
+                    Must be at least {{ passwordMinLength }} characters.
+                  </p>
+                }
+                @if (
+                  form.controls.password.touched &&
+                  form.controls.password.errors?.['passwordCommon']
+                ) {
+                  <p class="text-error ml-1 text-xs font-medium">Password is too common.</p>
+                }
+                @if (
+                  form.controls.password.touched &&
+                  form.controls.password.errors?.['passwordNumeric']
+                ) {
+                  <p class="text-error ml-1 text-xs font-medium">
+                    Password cannot be entirely numeric.
+                  </p>
+                }
+                @if (form.touched && form.errors?.['passwordSimilar']) {
+                  <p class="text-error ml-1 text-xs font-medium">
+                    Password is too similar to your personal information.
+                  </p>
+                }
               </div>
               <div class="space-y-2">
                 <label class="text-secondary ml-1 block text-sm font-semibold" for="reg-confirm">
@@ -258,6 +285,9 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                     }}</span>
                   </button>
                 </div>
+                @if (form.controls.confirm_password.touched && form.errors?.['passwordMismatch']) {
+                  <p class="text-error ml-1 text-xs font-medium">Passwords do not match.</p>
+                }
               </div>
               <button
                 type="submit"
@@ -316,6 +346,7 @@ export class RegisterPage {
   protected readonly loading = signal(false);
   protected readonly showPassword = signal(false);
   protected readonly showConfirmPassword = signal(false);
+  protected readonly passwordMinLength = AuthValidators.passwordMinLength();
 
   protected readonly roleOptions: { value: SignupRole; label: string }[] = [
     { value: 'patient', label: 'Patient' },
@@ -323,28 +354,38 @@ export class RegisterPage {
     { value: 'receptionist', label: 'Receptionist' },
   ];
 
-  protected readonly form = new FormGroup({
-    role: new FormControl<SignupRole>('patient', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-    first_name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    last_name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    email: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.email],
-    }),
-    phone_number: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    date_of_birth: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, pastDateValidator],
-    }),
-    password: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.minLength(6)],
-    }),
-    confirm_password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-  });
+  protected readonly form = new FormGroup(
+    {
+      role: new FormControl<SignupRole>('patient', {
+        nonNullable: true,
+        validators: [Validators.required],
+      }),
+      first_name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      last_name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      email: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.email],
+      }),
+      phone_number: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      date_of_birth: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, pastDateValidator],
+      }),
+      password: new FormControl('', {
+        nonNullable: true,
+        validators: [
+          Validators.required,
+          Validators.minLength(this.passwordMinLength),
+          AuthValidators.passwordNotAllNumeric(),
+        ],
+      }),
+      confirm_password: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required],
+      }),
+    },
+    { validators: [AuthValidators.signupPasswordPolicy()] },
+  );
 
   togglePassword(): void {
     this.showPassword.update((v) => !v);
@@ -360,10 +401,6 @@ export class RegisterPage {
       return;
     }
     const raw = this.form.getRawValue();
-    if (raw.password !== raw.confirm_password) {
-      this.toast.warning('Passwords do not match.', 'Check your password');
-      return;
-    }
     this.loading.set(true);
     this.authService
       .register({
