@@ -28,6 +28,13 @@ export interface DoctorSummary {
   specialty: string;
 }
 
+export interface DoctorAvailability {
+  id: number;
+  name: string;
+  specialty?: string;
+  status: 'AVAILABLE' | 'BUSY' | 'AWAY';
+}
+
 export interface Appointment {
   id: string;
   doctor: DoctorSummary;
