@@ -10,8 +10,8 @@ type UserFormState = {
   first_name: string;
   last_name: string;
   email: string;
-  password: string;
   phone_number: string;
+  date_of_birth: string;
   role: AdminRole;
   specialty: string;
   is_active: boolean;
@@ -69,6 +69,16 @@ type PrefetchEntry = {
       <button class="btn-secondary" (click)="applyFilters()">Apply</button>
       <button class="btn-primary" (click)="openCreateModal()">Create User</button>
     </div>
+
+    @if (createSuccessNotice) {
+      <div class="mb-4 flex items-start gap-3 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+        <span class="material-symbols-outlined mt-0.5 shrink-0 text-lg text-emerald-600">check_circle</span>
+        <span>{{ createSuccessNotice }}</span>
+        <button class="ml-auto shrink-0 text-emerald-500 hover:text-emerald-700" (click)="createSuccessNotice = null">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+    }
 
     <div class="card-surface overflow-x-auto p-4">
       @if (loadError) {
@@ -147,9 +157,6 @@ type PrefetchEntry = {
             <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="First name" [(ngModel)]="form.first_name" />
             <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="Last name" [(ngModel)]="form.last_name" />
             <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm md:col-span-2" placeholder="Email" [(ngModel)]="form.email" />
-            @if (!editingUserId) {
-              <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm md:col-span-2" placeholder="Temporary password" [(ngModel)]="form.password" />
-            }
             <select class="rounded-lg border border-slate-200 px-3 py-2 text-sm" [(ngModel)]="form.role">
               <option value="admin">Admin</option>
               <option value="doctor">Doctor</option>
@@ -165,12 +172,19 @@ type PrefetchEntry = {
               <option [ngValue]="false">Pending approval</option>
             </select>
             <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="Phone number" [(ngModel)]="form.phone_number" />
+            <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm" type="date" placeholder="Date of birth" [(ngModel)]="form.date_of_birth" />
             @if (form.role === 'doctor') {
               <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm md:col-span-2" placeholder="Specialty" [(ngModel)]="form.specialty" />
             }
           </div>
+          @if (!editingUserId) {
+            <p class="mt-3 flex items-start gap-2 rounded-lg bg-sky-50 px-3 py-2 text-xs font-medium text-sky-700">
+              <span class="material-symbols-outlined mt-px shrink-0 text-sm">info</span>
+              <span>No password needed — the user will receive an OTP email to set their own password.</span>
+            </p>
+          }
           @if (modalError) {
-            <p class="mt-3 text-sm text-rose-600">{{ modalError }}</p>
+            <p class="mt-3 whitespace-pre-line text-sm text-rose-600">{{ modalError }}</p>
           }
           <div class="mt-4 flex justify-end gap-2">
             <button class="btn-secondary" (click)="closeModal()">Cancel</button>
@@ -190,6 +204,7 @@ export class UserManagementPage {
   protected users: AdminUserRow[] = [];
   protected loadError: string | null = null;
   protected modalError: string | null = null;
+  protected createSuccessNotice: string | null = null;
   protected page = 1;
   protected readonly pageSize = 10;
   protected totalCount = 0;
@@ -287,8 +302,8 @@ export class UserManagementPage {
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email,
-      password: '',
       phone_number: user.phone_number ?? '',
+      date_of_birth: user.date_of_birth ?? '',
       role: user.role ?? 'patient',
       specialty: user.specialty ?? '',
       is_active: user.is_active,
@@ -315,9 +330,13 @@ export class UserManagementPage {
       ? this.adminService.updateUser(this.editingUserId, payload)
       : this.adminService.createUser(payload);
 
+    const isCreating = !this.editingUserId;
     request$.subscribe({
       next: () => {
         this.closeModal();
+        if (isCreating) {
+          this.createSuccessNotice = `User created successfully. An OTP email was sent to ${payload.email} so they can set their password.`;
+        }
         this.fetchUsers(this.activeQuery);
       },
       error: (error: unknown) => {
@@ -494,8 +513,8 @@ export class UserManagementPage {
       first_name: '',
       last_name: '',
       email: '',
-      password: '',
       phone_number: '',
+      date_of_birth: '',
       role: 'patient',
       specialty: '',
       is_active: true,
@@ -504,10 +523,49 @@ export class UserManagementPage {
   }
 
   private readErrorMessage(error: unknown, fallback: string): string {
-    if (error instanceof HttpErrorResponse && typeof error.error?.detail === 'string') {
-      return error.error.detail;
+    if (!(error instanceof HttpErrorResponse) || !error.error || typeof error.error !== 'object') {
+      return fallback;
     }
-    return fallback;
+    const body = error.error as Record<string, unknown>;
+
+    if (typeof body['detail'] === 'string') {
+      return body['detail'];
+    }
+
+    const fieldLabels: Record<string, string> = {
+      email: 'Email',
+      first_name: 'First name',
+      last_name: 'Last name',
+      phone_number: 'Phone number',
+      date_of_birth: 'Date of birth',
+      role: 'Role',
+      specialty: 'Specialty',
+      is_active: 'Active status',
+      is_approved: 'Approval status',
+    };
+
+    const lines: string[] = [];
+    const pushField = (key: string, val: unknown): void => {
+      const label = fieldLabels[key] ?? key;
+      if (Array.isArray(val)) {
+        lines.push(`${label}: ${val.map(String).join(' ')}`);
+      } else if (typeof val === 'string') {
+        lines.push(`${label}: ${val}`);
+      }
+    };
+
+    if (body['non_field_errors']) {
+      const nfe = body['non_field_errors'];
+      if (Array.isArray(nfe)) lines.push(...nfe.map(String));
+      else if (typeof nfe === 'string') lines.push(nfe);
+    }
+
+    for (const [key, val] of Object.entries(body)) {
+      if (key === 'non_field_errors' || key === 'detail') continue;
+      pushField(key, val);
+    }
+
+    return lines.length > 0 ? lines.join('\n') : fallback;
   }
 
   private filterKey(filters: UserListQuery): string {

@@ -34,6 +34,21 @@ export class AuthService {
     return this.http.post<SignupApiResponse>('/api/auth/signup/', payload);
   }
 
+  setPasswordWithOtp(payload: {
+    email: string;
+    otp: string;
+    new_password: string;
+  }): Observable<{ detail: string }> {
+    return this.http.post<{ detail: string }>('/api/auth/set-password-otp/', payload);
+  }
+
+  changePassword(payload: {
+    old_password: string;
+    new_password: string;
+  }): Observable<{ detail: string }> {
+    return this.http.post<{ detail: string }>('/api/auth/change-password/', payload);
+  }
+
   me(): Observable<AuthUser> {
     return this.http.get<UserMeApi>('/api/auth/me/').pipe(
       map((api) => {
@@ -189,6 +204,40 @@ export class AuthService {
       return chunks.slice(0, 4).join(' ');
     }
     return 'Registration failed. Check your details and try again.';
+  }
+
+  /**
+   * Parses a DRF 400 error response into per-field errors and a combined message.
+   * Handles `{ detail: string }`, `{ field: string[] }`, and `{ non_field_errors: string[] }`.
+   */
+  static parseDrfErrors(
+    error: unknown,
+    fallback: string,
+  ): { message: string; fieldErrors: Record<string, string> } {
+    const empty = { message: fallback, fieldErrors: {} };
+    if (!(error instanceof HttpErrorResponse) || !error.error || typeof error.error !== 'object') {
+      return empty;
+    }
+    const body = error.error as Record<string, unknown>;
+    if (typeof body['detail'] === 'string') {
+      return { message: body['detail'], fieldErrors: {} };
+    }
+    const fieldErrors: Record<string, string> = {};
+    const globalParts: string[] = [];
+    for (const [key, val] of Object.entries(body)) {
+      const text = Array.isArray(val) ? val.map(String).join(' ') : typeof val === 'string' ? val : null;
+      if (!text) continue;
+      if (key === 'non_field_errors') {
+        globalParts.push(text);
+      } else {
+        fieldErrors[key] = text;
+      }
+    }
+    const allParts = [...globalParts, ...Object.values(fieldErrors)];
+    return {
+      message: allParts.length > 0 ? allParts.join(' ') : fallback,
+      fieldErrors,
+    };
   }
 
   mapSignupToSession(response: SignupApiResponse): AuthSessionPayload | null {
