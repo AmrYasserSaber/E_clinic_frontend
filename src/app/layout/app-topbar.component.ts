@@ -9,12 +9,29 @@ import { AuthService } from '../services/auth.service';
   imports: [RouterLink],
   template: `
     <header class="mb-4 flex items-center justify-between rounded-2xl bg-white p-3 shadow-soft">
-      <a routerLink="/" class="text-lg font-semibold text-cyan-800">MediFlow</a>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-3">
+        <a routerLink="/" class="text-lg font-semibold text-cyan-800">MediFlow</a>
         <span class="rounded-full bg-cyan-50 px-3 py-1 text-xs uppercase text-cyan-700">{{
           auth.role()
         }}</span>
-        <button class="btn-secondary" (click)="logout()">Sign out</button>
+      </div>
+      <div class="flex items-center gap-3">
+        @if (auth.role() === 'patient') {
+          <a
+            routerLink="/patient/profile"
+            class="flex h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2 ring-cyan-200/80 transition hover:ring-cyan-400"
+            aria-label="Open profile"
+          >
+            <img
+              src="https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png"
+              alt=""
+              width="40"
+              height="40"
+              class="h-full w-full object-cover"
+            />
+          </a>
+        }
+        <button class="btn-secondary" type="button" (click)="logout()">Sign out</button>
       </div>
     </header>
   `,

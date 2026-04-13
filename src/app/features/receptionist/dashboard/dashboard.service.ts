@@ -1,6 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, map, throwError } from 'rxjs';
+import { DoctorAvailability } from '../../../models/domain.models';
+export type { DoctorAvailability } from '../../../models/domain.models';
 
 export interface QueueItem {
   id: number;
@@ -9,12 +11,6 @@ export interface QueueItem {
   check_in_time?: string | null;
   status: 'CONFIRMED' | 'CHECKED_IN';
   waiting_minutes: number;
-}
-
-export interface DoctorAvailability {
-  id: number;
-  name: string;
-  status: 'AVAILABLE' | 'BUSY' | 'AWAY';
 }
 
 interface QueueApiItem {

@@ -10,6 +10,20 @@ export interface UserMeApi {
   groups: string[];
 }
 
+/** GET/PATCH /api/patients/me/ (PatientMeReadSerializer). */
+export interface PatientProfileApi {
+  emergency_contact_name: string;
+  emergency_contact_phone: string;
+  address: string;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PatientMeApi extends UserMeApi {
+  profile: PatientProfileApi | null;
+}
+
 export interface LoginApiResponse {
   user: UserMeApi;
   access_token: string;

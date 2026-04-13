@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, finalize, map, of, shareReplay, tap, throwError } from 'rxjs';
 import {
   LoginApiResponse,
+  PatientMeApi,
   SignupApiResponse,
   TokenRefreshApiResponse,
   UserMeApi,
@@ -44,6 +45,17 @@ export class AuthService {
         return user;
       }),
     );
+  }
+
+  /** Patient profile (includes nested profile) from GET /api/patients/me/. */
+  getPatientMeApi(): Observable<PatientMeApi> {
+    return this.http.get<PatientMeApi>('/api/patients/me/');
+  }
+
+  patchPatientMe(
+    payload: Partial<Pick<UserMeApi, 'first_name' | 'last_name' | 'phone_number' | 'date_of_birth'>>,
+  ): Observable<PatientMeApi> {
+    return this.http.patch<PatientMeApi>('/api/patients/me/', payload);
   }
 
   logout(): Observable<void> {
