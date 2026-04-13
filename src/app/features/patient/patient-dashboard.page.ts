@@ -114,7 +114,7 @@ const HISTORY_ICONS = ['medical_services', 'vaccines', 'lab_research', 'dentistr
       <!-- Quick actions -->
       <section class="space-y-4">
         <h2 class="px-1 text-sm font-bold uppercase tracking-widest text-slate-400">Quick actions</h2>
-        <div class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <a
             routerLink="/patient/book"
             class="flex flex-col items-center gap-3 rounded-xl bg-white p-4 no-underline transition-transform hover:-translate-y-1"
@@ -137,6 +137,18 @@ const HISTORY_ICONS = ['medical_services', 'vaccines', 'lab_research', 'dentistr
             </div>
             <span class="text-center text-[11px] font-bold leading-tight text-slate-800"
               >View all<br />appts</span
+            >
+          </a>
+          <a
+            routerLink="/patient/profile"
+            class="flex flex-col items-center gap-3 rounded-xl bg-white p-4 no-underline transition-transform hover:-translate-y-1"
+            style="box-shadow: 0 0 20px rgba(0, 100, 121, 0.08);"
+          >
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-primary">
+              <span class="material-symbols-outlined">person</span>
+            </div>
+            <span class="text-center text-[11px] font-bold leading-tight text-slate-800"
+              >My<br />profile</span
             >
           </a>
           <button

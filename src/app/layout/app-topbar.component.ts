@@ -11,6 +11,9 @@ import { AuthService } from '../services/auth.service';
     <header class="mb-4 flex items-center justify-between rounded-2xl bg-white p-3 shadow-soft">
       <a routerLink="/" class="text-lg font-semibold text-cyan-800">MediFlow</a>
       <div class="flex items-center gap-2">
+        @if (auth.role() === 'patient') {
+          <a routerLink="/patient/profile" class="btn-secondary no-underline">Profile</a>
+        }
         <span class="rounded-full bg-cyan-50 px-3 py-1 text-xs uppercase text-cyan-700">{{
           auth.role()
         }}</span>
