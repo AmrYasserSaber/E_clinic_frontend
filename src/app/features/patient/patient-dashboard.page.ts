@@ -59,7 +59,9 @@ const HISTORY_ICONS = ['medical_services', 'vaccines', 'lab_research', 'dentistr
                 >
                   {{ nextAppointment.doctor.specialty.trim() || 'Physician' }}
                 </span>
-                <h3 class="font-headline mt-1 text-xl font-bold text-slate-900">{{ nextAppointment.doctor.fullName }}</h3>
+                <h3 class="font-headline mt-1 text-xl font-bold text-slate-900">
+                  {{ nextAppointment.doctor.fullName }}
+                </h3>
                 <p class="text-sm text-slate-500">MediFlow Clinic</p>
               </div>
             </div>
@@ -71,7 +73,9 @@ const HISTORY_ICONS = ['medical_services', 'vaccines', 'lab_research', 'dentistr
                 </div>
                 <div>
                   <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Date</p>
-                  <p class="text-sm font-semibold text-slate-900">{{ formatDisplayDate(nextAppointment.date) }}</p>
+                  <p class="text-sm font-semibold text-slate-900">
+                    {{ formatDisplayDate(nextAppointment.date) }}
+                  </p>
                 </div>
               </div>
               <div class="flex items-center gap-3 rounded-lg bg-surface-container-low p-3">
@@ -80,7 +84,9 @@ const HISTORY_ICONS = ['medical_services', 'vaccines', 'lab_research', 'dentistr
                 </div>
                 <div>
                   <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Time</p>
-                  <p class="text-sm font-semibold text-slate-900">{{ formatDisplayTime(nextAppointment.time) }}</p>
+                  <p class="text-sm font-semibold text-slate-900">
+                    {{ formatDisplayTime(nextAppointment.time) }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -96,21 +102,27 @@ const HISTORY_ICONS = ['medical_services', 'vaccines', 'lab_research', 'dentistr
           >
             <p class="font-bold text-slate-900">No upcoming appointment</p>
             <p class="mt-1 text-sm text-slate-500">Pick a doctor and time that work for you.</p>
-            <a routerLink="/patient/book" class="btn-primary mt-4 inline-block no-underline">Book appointment</a>
+            <a routerLink="/patient/book" class="btn-primary mt-4 inline-block no-underline"
+              >Book appointment</a
+            >
           </div>
         }
       </section>
 
       <!-- Quick actions -->
       <section class="space-y-4">
-        <h2 class="px-1 text-sm font-bold uppercase tracking-widest text-slate-400">Quick actions</h2>
-        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <h2 class="px-1 text-sm font-bold uppercase tracking-widest text-slate-400">
+          Quick actions
+        </h2>
+        <div class="grid grid-cols-2 gap-4">
           <a
             routerLink="/patient/book"
             class="flex flex-col items-center gap-3 rounded-xl bg-white p-4 no-underline transition-transform hover:-translate-y-1"
             style="box-shadow: 0 0 20px rgba(0, 100, 121, 0.08);"
           >
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+            >
               <span class="material-symbols-outlined">add_circle</span>
             </div>
             <span class="text-center text-[11px] font-bold leading-tight text-slate-800"
@@ -122,7 +134,9 @@ const HISTORY_ICONS = ['medical_services', 'vaccines', 'lab_research', 'dentistr
             class="flex flex-col items-center gap-3 rounded-xl bg-white p-4 no-underline transition-transform hover:-translate-y-1"
             style="box-shadow: 0 0 20px rgba(0, 100, 121, 0.08);"
           >
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary-fixed/50 text-secondary">
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary-fixed/50 text-secondary"
+            >
               <span class="material-symbols-outlined">list_alt</span>
             </div>
             <span class="text-center text-[11px] font-bold leading-tight text-slate-800"
@@ -134,11 +148,27 @@ const HISTORY_ICONS = ['medical_services', 'vaccines', 'lab_research', 'dentistr
             class="flex flex-col items-center gap-3 rounded-xl bg-white p-4 no-underline transition-transform hover:-translate-y-1"
             style="box-shadow: 0 0 20px rgba(0, 100, 121, 0.08);"
           >
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-primary">
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-primary"
+            >
               <span class="material-symbols-outlined">person</span>
             </div>
             <span class="text-center text-[11px] font-bold leading-tight text-slate-800"
               >My<br />profile</span
+            >
+          </a>
+          <a
+            routerLink="/patient/consultations"
+            class="flex flex-col items-center gap-3 rounded-xl bg-white p-4 no-underline transition-transform hover:-translate-y-1"
+            style="box-shadow: 0 0 20px rgba(0, 100, 121, 0.08);"
+          >
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700"
+            >
+              <span class="material-symbols-outlined">clinical_notes</span>
+            </div>
+            <span class="text-center text-[11px] font-bold leading-tight text-slate-800"
+              >Consultation<br />history</span
             >
           </a>
         </div>
@@ -148,7 +178,9 @@ const HISTORY_ICONS = ['medical_services', 'vaccines', 'lab_research', 'dentistr
       <section class="space-y-4">
         <div class="flex items-center justify-between px-1">
           <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400">Visit history</h2>
-          <a routerLink="/patient/appointments" class="text-xs font-bold text-primary no-underline hover:underline"
+          <a
+            routerLink="/patient/consultations"
+            class="text-xs font-bold text-primary no-underline hover:underline"
             >See all</a
           >
         </div>
@@ -171,7 +203,9 @@ const HISTORY_ICONS = ['medical_services', 'vaccines', 'lab_research', 'dentistr
                     <span class="material-symbols-outlined text-[22px]">{{ historyIcon(i) }}</span>
                   </div>
                   <div class="min-w-0">
-                    <p class="truncate text-sm font-bold text-slate-900">{{ historyTitle(appt) }}</p>
+                    <p class="truncate text-sm font-bold text-slate-900">
+                      {{ historyTitle(appt) }}
+                    </p>
                     <p class="text-[11px] text-slate-500">
                       {{ formatDisplayDate(appt.date) }} · {{ shortDoctor(appt) }}
                     </p>
@@ -208,7 +242,9 @@ export class PatientDashboardPage implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading = false;
-        this.toast.error(typeof err.error?.detail === 'string' ? err.error.detail : 'Could not load appointments.');
+        this.toast.error(
+          typeof err.error?.detail === 'string' ? err.error.detail : 'Could not load appointments.',
+        );
       },
     });
   }
@@ -254,7 +290,11 @@ export class PatientDashboardPage implements OnInit {
   protected formatDisplayDate(isoDate: string): string {
     const [y, m, d] = isoDate.split('-').map((n) => Number(n));
     const date = new Date(y, (m || 1) - 1, d || 1);
-    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(date);
   }
 
   protected formatDisplayTime(time: string): string {
@@ -267,9 +307,13 @@ export class PatientDashboardPage implements OnInit {
   }
 
   protected initials(name: string): string {
-    const parts = name.replace(/^Dr\.\s*/i, '').trim().split(/\s+/).filter(Boolean);
+    const parts = name
+      .replace(/^Dr\.\s*/i, '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
     const a = parts[0]?.[0] ?? '?';
-    const b = parts.length > 1 ? parts[parts.length - 1][0] : parts[0]?.[1] ?? '';
+    const b = parts.length > 1 ? parts[parts.length - 1][0] : (parts[0]?.[1] ?? '');
     return (a + b).toUpperCase();
   }
 
@@ -324,7 +368,8 @@ export class PatientDashboardPage implements OnInit {
   }
 
   private isUpcomingCandidate(a: Appointment): boolean {
-    if (a.status === 'CANCELLED' || a.status === 'COMPLETED' || a.status === 'NO_SHOW') return false;
+    if (a.status === 'CANCELLED' || a.status === 'COMPLETED' || a.status === 'NO_SHOW')
+      return false;
     const todayIso = this.todayIso();
     if (a.date > todayIso) return true;
     if (a.date < todayIso) return false;

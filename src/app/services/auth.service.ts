@@ -51,7 +51,7 @@ export class AuthService {
   }
 
   me(): Observable<AuthUser> {
-    return this.http.get<UserMeApi>('/api/auth/me/').pipe(
+    return this.getUserMeApi().pipe(
       map((api) => {
         const user = mapUserMeToAuthUser(api);
         if (!user) {
@@ -62,13 +62,20 @@ export class AuthService {
     );
   }
 
+  /** Raw current user profile from GET /api/auth/me/. */
+  getUserMeApi(): Observable<UserMeApi> {
+    return this.http.get<UserMeApi>('/api/auth/me/');
+  }
+
   /** Patient profile (includes nested profile) from GET /api/patients/me/. */
   getPatientMeApi(): Observable<PatientMeApi> {
     return this.http.get<PatientMeApi>('/api/patients/me/');
   }
 
   patchPatientMe(
-    payload: Partial<Pick<UserMeApi, 'first_name' | 'last_name' | 'phone_number' | 'date_of_birth'>>,
+    payload: Partial<
+      Pick<UserMeApi, 'first_name' | 'last_name' | 'phone_number' | 'date_of_birth'>
+    >,
   ): Observable<PatientMeApi> {
     return this.http.patch<PatientMeApi>('/api/patients/me/', payload);
   }
@@ -251,7 +258,11 @@ export class AuthService {
     const fieldErrors: Record<string, string> = {};
     const globalParts: string[] = [];
     for (const [key, val] of Object.entries(body)) {
-      const text = Array.isArray(val) ? val.map(String).join(' ') : typeof val === 'string' ? val : null;
+      const text = Array.isArray(val)
+        ? val.map(String).join(' ')
+        : typeof val === 'string'
+          ? val
+          : null;
       if (!text) continue;
       if (key === 'non_field_errors') {
         globalParts.push(text);
