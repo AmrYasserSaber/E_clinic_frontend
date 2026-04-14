@@ -156,6 +156,43 @@ const REMEMBER_EMAIL_KEY = 'mediflow_remember_email';
                 }
               </button>
             </form>
+            <div class="mt-5 flex items-center gap-3">
+              <div
+                class="h-px grow bg-linear-to-r from-transparent via-outline-variant/25 to-transparent"
+              ></div>
+              <div class="text-outline-variant text-[10px] font-bold tracking-[0.2em] uppercase">
+                OR
+              </div>
+              <div
+                class="h-px grow bg-linear-to-r from-transparent via-outline-variant/25 to-transparent"
+              ></div>
+            </div>
+            <button
+              type="button"
+              (click)="continueWithGoogle()"
+              [disabled]="googleLoading()"
+              class="bg-surface-container-low neumorphic-inset mt-5 flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-3 font-bold text-on-surface transition-all hover:-translate-y-0.5 active:scale-95 disabled:pointer-events-none disabled:opacity-60"
+            >
+              <svg class="h-5 w-5" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                <path
+                  fill="#FFC107"
+                  d="M43.611 20.083H42V20H24v8h11.303C33.675 32.658 29.223 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.972 6.053 29.738 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.651-.389-3.917Z"
+                />
+                <path
+                  fill="#FF3D00"
+                  d="M6.306 14.691 12.88 19.51C14.656 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.972 6.053 29.738 4 24 4c-7.682 0-14.347 4.326-17.694 10.691Z"
+                />
+                <path
+                  fill="#4CAF50"
+                  d="M24 44c5.127 0 9.698-1.969 13.192-5.192l-6.09-5.158C29.07 35.091 26.65 36 24 36c-5.202 0-9.64-3.319-11.269-7.946l-6.525 5.027C9.505 39.556 16.227 44 24 44Z"
+                />
+                <path
+                  fill="#1976D2"
+                  d="M43.611 20.083H42V20H24v8h11.303a11.96 11.96 0 0 1-4.201 5.65l.002-.001 6.09 5.158C36.712 39.252 44 34 44 24c0-1.341-.138-2.651-.389-3.917Z"
+                />
+              </svg>
+              <span>{{ googleLoading() ? 'Redirecting…' : 'Continue with Google' }}</span>
+            </button>
             <div class="border-outline-variant/10 mt-8 space-y-3 border-t pt-6 text-center">
               <p class="text-on-surface-variant text-sm font-medium">
                 Don't have an account?
@@ -206,6 +243,7 @@ export class LoginPage {
   private readonly toast = inject(ToastService);
 
   protected readonly loading = signal(false);
+  protected readonly googleLoading = signal(false);
   protected readonly signupNotice = signal('');
   protected readonly pendingApprovalNotice = signal('');
   protected readonly showPassword = signal(false);
@@ -257,6 +295,19 @@ export class LoginPage {
           return;
         }
         this.toast.error(AuthService.loginErrorMessage(err), 'Sign in failed');
+      },
+    });
+  }
+
+  continueWithGoogle(): void {
+    this.googleLoading.set(true);
+    this.authService.googleStart('login').subscribe({
+      next: (authorizationUrl) => {
+        window.location.assign(authorizationUrl);
+      },
+      error: () => {
+        this.googleLoading.set(false);
+        this.toast.error('Unable to start Google sign-in. Please try again.', 'Google sign-in');
       },
     });
   }
