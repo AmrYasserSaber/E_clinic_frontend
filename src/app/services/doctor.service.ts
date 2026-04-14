@@ -65,6 +65,18 @@ export interface DoctorAppointment {
   check_in_time: string | null;
   patient_info: AppointmentPersonInfo;
   doctor_info: AppointmentPersonInfo;
+  consultation_summary?: {
+    diagnosis: string;
+    notes: string;
+    requested_tests: string[];
+    prescription_items: Array<{
+      id: number;
+      drug: string;
+      dose: string;
+      duration: string;
+      instructions?: string;
+    }>;
+  } | null;
 }
 
 @Injectable({ providedIn: 'root' })

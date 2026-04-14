@@ -1,6 +1,5 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
 import { DoctorAppointment, DoctorService } from '../../services/doctor.service';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
@@ -9,13 +8,7 @@ import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
 
 @Component({
   standalone: true,
-  imports: [
-    RouterLink,
-    PageHeaderComponent,
-    EmptyStateComponent,
-    SkeletonBlockComponent,
-    StatusBadgeComponent,
-  ],
+  imports: [PageHeaderComponent, EmptyStateComponent, SkeletonBlockComponent, StatusBadgeComponent],
   template: `
     <app-page-header
       title="My Consultations"
@@ -57,15 +50,42 @@ import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
 
                 <div class="flex items-center gap-2">
                   <app-status-badge [status]="item.status" />
-                  <a
-                    class="btn-secondary no-underline"
-                    [routerLink]="'/doctor/consultation'"
-                    [queryParams]="{ appointmentId: item.id }"
-                  >
-                    Open EMR
-                  </a>
+                  <button class="btn-secondary" type="button" (click)="toggleDetails(item.id)">
+                    {{ expandedConsultationId() === item.id ? 'Hide' : 'View' }}
+                  </button>
                 </div>
               </div>
+
+              @if (expandedConsultationId() === item.id) {
+                <div class="mt-3 space-y-2 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Diagnosis
+                  </p>
+                  <p class="text-sm text-slate-700">
+                    {{ item.consultation_summary?.diagnosis || 'No diagnosis recorded.' }}
+                  </p>
+
+                  @if (item.consultation_summary?.notes?.trim()) {
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Notes
+                    </p>
+                    <p class="whitespace-pre-wrap text-sm text-slate-700">
+                      {{ item.consultation_summary?.notes }}
+                    </p>
+                  }
+
+                  @if ((item.consultation_summary?.requested_tests?.length ?? 0) > 0) {
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Requested tests
+                    </p>
+                    <ul class="list-disc pl-5 text-sm text-slate-700">
+                      @for (test of item.consultation_summary!.requested_tests; track test) {
+                        <li>{{ test }}</li>
+                      }
+                    </ul>
+                  }
+                </div>
+              }
             </article>
           }
         </div>
@@ -80,6 +100,7 @@ export class DoctorConsultationsPage {
   protected readonly consultations = signal<DoctorAppointment[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
+  protected readonly expandedConsultationId = signal<number | null>(null);
 
   constructor() {
     this.loadConsultations();
@@ -109,6 +130,10 @@ export class DoctorConsultationsPage {
     const last = appt.patient_info?.last_name ?? '';
     const full = `${first} ${last}`.trim();
     return full || 'Unknown patient';
+  }
+
+  protected toggleDetails(id: number): void {
+    this.expandedConsultationId.update((current) => (current === id ? null : id));
   }
 
   private extractErrorMessage(error: unknown): string {

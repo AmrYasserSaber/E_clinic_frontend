@@ -43,7 +43,9 @@ import { ConsultationModalComponent } from './consultation-modal.component';
         </div>
 
         @if (queueError()) {
-          <p class="mb-3 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ queueError() }}</p>
+          <p class="mb-3 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            {{ queueError() }}
+          </p>
         }
 
         @if (loadingQueue()) {
@@ -61,9 +63,8 @@ import { ConsultationModalComponent } from './consultation-modal.component';
                   <div class="space-y-1">
                     <p class="font-semibold text-slate-900">{{ item.patient_full_name }}</p>
                     <p class="text-xs text-slate-500">
-                      Queue #{{ i + 1 }}
-                      · Check-in: {{ formatCheckInTime(item.check_in_time) }}
-                      · Waiting: {{ waitingLabel(item.waiting_time_minutes) }}
+                      Queue #{{ i + 1 }} · Check-in: {{ formatCheckInTime(item.check_in_time) }} ·
+                      Waiting: {{ waitingLabel(item.waiting_time_minutes) }}
                     </p>
                   </div>
 
@@ -122,7 +123,9 @@ import { ConsultationModalComponent } from './consultation-modal.component';
         </div>
 
         @if (upcomingError()) {
-          <p class="mb-3 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ upcomingError() }}</p>
+          <p class="mb-3 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            {{ upcomingError() }}
+          </p>
         }
 
         @if (loadingUpcoming()) {
@@ -165,7 +168,9 @@ import { ConsultationModalComponent } from './consultation-modal.component';
           ></textarea>
 
           <div class="mt-4 flex justify-end gap-2">
-            <button class="btn-secondary" type="button" (click)="closeDeclineDialog()">Cancel</button>
+            <button class="btn-secondary" type="button" (click)="closeDeclineDialog()">
+              Cancel
+            </button>
             <button
               class="btn-primary"
               type="button"
@@ -188,7 +193,9 @@ import { ConsultationModalComponent } from './consultation-modal.component';
           </p>
 
           <div class="mt-4 flex justify-end gap-2">
-            <button class="btn-secondary" type="button" (click)="closeNoShowDialog()">Cancel</button>
+            <button class="btn-secondary" type="button" (click)="closeNoShowDialog()">
+              Cancel
+            </button>
             <button
               class="btn-primary"
               type="button"
@@ -407,7 +414,7 @@ export class DoctorDashboardComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (rows) => {
-          this.upcoming.set(rows);
+          this.upcoming.set(this.filterUpcomingFromNowPlusThirty(rows));
           this.loadingUpcoming.set(false);
         },
         error: (err: unknown) => {
@@ -459,5 +466,31 @@ export class DoctorDashboardComponent {
     const month = String(value.getMonth() + 1).padStart(2, '0');
     const day = String(value.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private filterUpcomingFromNowPlusThirty(rows: DoctorAppointment[]): DoctorAppointment[] {
+    const threshold = new Date(Date.now() + 30 * 60 * 1000);
+    return rows.filter((row) => {
+      const appointmentDateTime = this.toAppointmentDateTime(row);
+      if (!appointmentDateTime) {
+        return true;
+      }
+      return appointmentDateTime.getTime() >= threshold.getTime();
+    });
+  }
+
+  private toAppointmentDateTime(row: DoctorAppointment): Date | null {
+    const [year, month, day] = row.appointment_date.split('-').map((n) => Number(n));
+    const [hour, minute] = row.appointment_time.split(':').map((n) => Number(n));
+    if (
+      !Number.isFinite(year) ||
+      !Number.isFinite(month) ||
+      !Number.isFinite(day) ||
+      !Number.isFinite(hour) ||
+      !Number.isFinite(minute)
+    ) {
+      return null;
+    }
+    return new Date(year, month - 1, day, hour, minute, 0, 0);
   }
 }

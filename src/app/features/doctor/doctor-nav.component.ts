@@ -37,13 +37,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       </a>
       <a
         class="btn-secondary"
-        routerLink="/doctor/consultation"
-        routerLinkActive="!bg-cyan-600 !text-white"
-      >
-        Consultation EMR
-      </a>
-      <a
-        class="btn-secondary"
         routerLink="/doctor/profile"
         routerLinkActive="!bg-cyan-600 !text-white"
       >

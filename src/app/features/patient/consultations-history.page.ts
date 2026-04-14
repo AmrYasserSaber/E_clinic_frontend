@@ -1,4 +1,4 @@
-import { HttpErrorResponse } from '@angular/common/http';
+﻿import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ToastService } from '../../core/toast/toast.service';
@@ -48,71 +48,79 @@ import { AppointmentsService } from '../../services/appointments.service';
                   Appointment #{{ appt.id }}
                 </p>
               </div>
-              <a
-                routerLink="/patient/appointments"
-                class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 no-underline"
-              >
-                Completed
-              </a>
+
+              <div class="flex items-center gap-2">
+                <a
+                  routerLink="/patient/appointments"
+                  class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 no-underline"
+                >
+                  Completed
+                </a>
+                <button class="btn-secondary" type="button" (click)="toggleDetails(appt.id)">
+                  {{ expandedConsultationId === appt.id ? 'Hide' : 'View' }}
+                </button>
+              </div>
             </div>
 
-            <div class="space-y-4">
-              <section class="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                <p class="mb-1 text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Diagnosis
-                </p>
-                <p class="text-sm text-slate-800">
-                  {{ appt.consultationSummary?.diagnosis || 'No diagnosis recorded.' }}
-                </p>
-              </section>
-
-              @if (appt.consultationSummary?.notes?.trim()) {
+            @if (expandedConsultationId === appt.id) {
+              <div class="space-y-4">
                 <section class="rounded-xl border border-slate-100 bg-slate-50 p-4">
                   <p class="mb-1 text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Doctor Notes
+                    Diagnosis
                   </p>
-                  <p class="whitespace-pre-wrap text-sm text-slate-800">
-                    {{ appt.consultationSummary?.notes }}
+                  <p class="text-sm text-slate-800">
+                    {{ appt.consultationSummary?.diagnosis || 'No diagnosis recorded.' }}
                   </p>
                 </section>
-              }
 
-              @if ((appt.consultationSummary?.requestedTests?.length ?? 0) > 0) {
-                <section class="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                  <p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Requested Tests
-                  </p>
-                  <ul class="list-disc space-y-1 pl-5 text-sm text-slate-800">
-                    @for (test of appt.consultationSummary!.requestedTests; track test) {
-                      <li>{{ test }}</li>
-                    }
-                  </ul>
-                </section>
-              }
+                @if (appt.consultationSummary?.notes?.trim()) {
+                  <section class="rounded-xl border border-slate-100 bg-slate-50 p-4">
+                    <p class="mb-1 text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Doctor Notes
+                    </p>
+                    <p class="whitespace-pre-wrap text-sm text-slate-800">
+                      {{ appt.consultationSummary?.notes }}
+                    </p>
+                  </section>
+                }
 
-              @if ((appt.consultationSummary?.prescriptionItems?.length ?? 0) > 0) {
-                <section class="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                  <p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Prescriptions
-                  </p>
-                  <div class="space-y-2">
-                    @for (item of appt.consultationSummary!.prescriptionItems; track item.id) {
-                      <article class="rounded-lg border border-slate-100 bg-white p-3">
-                        <p class="text-sm font-semibold text-slate-900">{{ item.drug }}</p>
-                        <p class="text-xs text-slate-600">
-                          Dose: {{ item.dose }} · Duration: {{ item.duration }}
-                        </p>
-                        @if (item.instructions?.trim()) {
-                          <p class="mt-1 text-xs text-slate-600">
-                            Instructions: {{ item.instructions }}
+                @if ((appt.consultationSummary?.requestedTests?.length ?? 0) > 0) {
+                  <section class="rounded-xl border border-slate-100 bg-slate-50 p-4">
+                    <p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Requested Tests
+                    </p>
+                    <ul class="list-disc space-y-1 pl-5 text-sm text-slate-800">
+                      @for (test of appt.consultationSummary!.requestedTests; track test) {
+                        <li>{{ test }}</li>
+                      }
+                    </ul>
+                  </section>
+                }
+
+                @if ((appt.consultationSummary?.prescriptionItems?.length ?? 0) > 0) {
+                  <section class="rounded-xl border border-slate-100 bg-slate-50 p-4">
+                    <p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Prescriptions
+                    </p>
+                    <div class="space-y-2">
+                      @for (item of appt.consultationSummary!.prescriptionItems; track item.id) {
+                        <article class="rounded-lg border border-slate-100 bg-white p-3">
+                          <p class="text-sm font-semibold text-slate-900">{{ item.drug }}</p>
+                          <p class="text-xs text-slate-600">
+                            Dose: {{ item.dose }} · Duration: {{ item.duration }}
                           </p>
-                        }
-                      </article>
-                    }
-                  </div>
-                </section>
-              }
-            </div>
+                          @if (item.instructions?.trim()) {
+                            <p class="mt-1 text-xs text-slate-600">
+                              Instructions: {{ item.instructions }}
+                            </p>
+                          }
+                        </article>
+                      }
+                    </div>
+                  </section>
+                }
+              </div>
+            }
           </article>
         }
       </div>
@@ -125,6 +133,7 @@ export class ConsultationsHistoryPage implements OnInit {
 
   protected consultations: Appointment[] = [];
   protected isLoading = false;
+  protected expandedConsultationId: string | null = null;
 
   ngOnInit(): void {
     this.loadConsultations();
@@ -147,6 +156,10 @@ export class ConsultationsHistoryPage implements OnInit {
     const period = hour >= 12 ? 'PM' : 'AM';
     const hour12 = hour % 12 || 12;
     return `${hour12}:${minute.toString().padStart(2, '0')} ${period}`;
+  }
+
+  protected toggleDetails(id: string): void {
+    this.expandedConsultationId = this.expandedConsultationId === id ? null : id;
   }
 
   private loadConsultations(): void {
