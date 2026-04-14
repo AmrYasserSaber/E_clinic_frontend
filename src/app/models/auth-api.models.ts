@@ -35,6 +35,18 @@ export interface TokenRefreshApiResponse {
   refresh?: string;
 }
 
+export type GoogleOAuthIntent = 'login' | 'signup';
+
+export interface GoogleStartApiResponse {
+  authorization_url: string;
+}
+
+export interface GooglePrefillApiResponse {
+  email?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+}
+
 export interface SignupPendingApiResponse {
   user: UserMeApi;
   detail: string;

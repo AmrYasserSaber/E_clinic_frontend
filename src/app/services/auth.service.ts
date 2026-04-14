@@ -2,6 +2,9 @@ import { HttpBackend, HttpClient, HttpErrorResponse } from '@angular/common/http
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, finalize, map, of, shareReplay, tap, throwError } from 'rxjs';
 import {
+  GoogleOAuthIntent,
+  GooglePrefillApiResponse,
+  GoogleStartApiResponse,
   LoginApiResponse,
   PatientMeApi,
   SignupApiResponse,
@@ -20,6 +23,26 @@ export class AuthService {
   private readonly httpRaw = new HttpClient(inject(HttpBackend));
   private readonly store = inject(AuthStore);
   private refreshInFlight: Observable<string> | null = null;
+
+  googleStart(intent: GoogleOAuthIntent): Observable<string> {
+    return this.http
+      .get<GoogleStartApiResponse>('/api/auth/google/start/', { params: { intent } })
+      .pipe(map((response) => response.authorization_url));
+  }
+
+  googleComplete(payload: Record<string, unknown>): Observable<AuthSessionPayload> {
+    return this.http
+      .post<LoginApiResponse>('/api/auth/google/complete/', payload)
+      .pipe(
+        map((response) =>
+          this.mapToSession(response.user, response.access_token, response.refresh_token),
+        ),
+      );
+  }
+
+  googlePrefill(payload: { one_time_code: string }): Observable<GooglePrefillApiResponse> {
+    return this.http.post<GooglePrefillApiResponse>('/api/auth/google/prefill/', payload);
+  }
 
   login(payload: { email: string; password: string }): Observable<AuthSessionPayload> {
     return this.http
