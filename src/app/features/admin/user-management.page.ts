@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { AdminRole, AdminService, AdminUserRow } from '../../services/admin.service';
+import { ToastService } from '../../core/toast/toast.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { AdminNavComponent } from './admin-nav.component';
 
@@ -129,7 +130,7 @@ type PrefetchEntry = {
                 <td class="py-2">
                   <div class="flex gap-2">
                     <button class="btn-secondary" (click)="openEditModal(user)">Edit</button>
-                    <button class="btn-secondary" (click)="deactivate(user)" [disabled]="!user.is_active">Deactivate</button>
+                    <button class="btn-secondary" (click)="deactivate(user)" [disabled]="!user.is_active || deactivatingUserId === user.id">{{ deactivatingUserId === user.id ? 'Deactivating...' : 'Deactivate' }}</button>
                   </div>
                 </td>
               </tr>
@@ -200,6 +201,8 @@ export class UserManagementPage {
   private static readonly USERS_CACHE_TTL_MS = 5 * 60 * 1000;
   private readonly adminService = inject(AdminService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly toast = inject(ToastService);
+  protected deactivatingUserId: number | null = null;
 
   protected users: AdminUserRow[] = [];
   protected loadError: string | null = null;
@@ -347,11 +350,21 @@ export class UserManagementPage {
   }
 
   protected deactivate(user: AdminUserRow): void {
-    this.adminService.deactivateUser(user.id).subscribe({
-      next: () => this.fetchUsers(this.activeQuery),
-      error: (error: unknown) => {
-        this.loadError = this.readErrorMessage(error, 'Unable to deactivate user.');
+    this.deactivatingUserId = user.id;
+    this.cdr.markForCheck();
+
+    this.adminService.deactivateUser(user.id).pipe(
+      finalize(() => {
+        this.deactivatingUserId = null;
         this.cdr.markForCheck();
+      })
+    ).subscribe({
+      next: () => {
+        this.toast.success(`${this.displayName(user)} has been deactivated.`);
+        this.fetchUsers(this.activeQuery);
+      },
+      error: (error: unknown) => {
+        this.toast.error(this.readErrorMessage(error, 'Unable to deactivate user.'));
       }
     });
   }
