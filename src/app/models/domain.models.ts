@@ -43,6 +43,22 @@ export interface Appointment {
   reason: string;
   status: AppointmentStatus;
   checkInTime?: string | null;
+  consultationSummary?: ConsultationSummary | null;
+}
+
+export interface ConsultationPrescriptionItem {
+  id: number;
+  drug: string;
+  dose: string;
+  duration: string;
+  instructions?: string;
+}
+
+export interface ConsultationSummary {
+  diagnosis: string;
+  notes: string;
+  requestedTests: string[];
+  prescriptionItems: ConsultationPrescriptionItem[];
 }
 
 export interface Slot {

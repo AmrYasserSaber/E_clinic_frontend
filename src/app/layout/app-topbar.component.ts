@@ -16,9 +16,9 @@ import { AuthService } from '../services/auth.service';
         }}</span>
       </div>
       <div class="flex items-center gap-3">
-        @if (auth.role() === 'patient') {
+        @if (auth.role() === 'patient' || auth.role() === 'doctor') {
           <a
-            routerLink="/patient/profile"
+            [routerLink]="auth.role() === 'doctor' ? '/doctor/profile' : '/patient/profile'"
             class="flex h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2 ring-cyan-200/80 transition hover:ring-cyan-400"
             aria-label="Open profile"
           >

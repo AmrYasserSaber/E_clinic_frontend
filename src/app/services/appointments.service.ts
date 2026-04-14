@@ -27,6 +27,18 @@ export interface AppointmentApiDto {
     last_name: string;
     email: string;
   };
+  consultation_summary?: {
+    diagnosis: string;
+    notes: string;
+    requested_tests: string[];
+    prescription_items: Array<{
+      id: number;
+      drug: string;
+      dose: string;
+      duration: string;
+      instructions?: string;
+    }>;
+  } | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -117,6 +129,20 @@ export class AppointmentsService {
       reason: row.reason ?? '',
       status: row.status as AppointmentStatus,
       checkInTime: row.check_in_time ?? null,
+      consultationSummary: row.consultation_summary
+        ? {
+            diagnosis: row.consultation_summary.diagnosis,
+            notes: row.consultation_summary.notes,
+            requestedTests: row.consultation_summary.requested_tests ?? [],
+            prescriptionItems: (row.consultation_summary.prescription_items ?? []).map((item) => ({
+              id: item.id,
+              drug: item.drug,
+              dose: item.dose,
+              duration: item.duration,
+              instructions: item.instructions,
+            })),
+          }
+        : null,
     };
   }
 }
