@@ -1,24 +1,49 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, ViewChild, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnDestroy,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
 import { catchError, forkJoin, of } from 'rxjs';
-import { AdminService, AnalyticsByDoctor, AnalyticsFilters, AnalyticsNoShowRate, AnalyticsPeakHours, AnalyticsSummary } from '../../services/admin.service';
+import {
+  AdminService,
+  AnalyticsByDoctor,
+  AnalyticsFilters,
+  AnalyticsNoShowRate,
+  AnalyticsPeakHours,
+  AnalyticsSummary,
+} from '../../services/admin.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
-import { AdminNavComponent } from './admin-nav.component';
 
 Chart.register(...registerables);
 
 @Component({
   standalone: true,
-  imports: [PageHeaderComponent, FormsModule, AdminNavComponent],
+  imports: [PageHeaderComponent, FormsModule],
   template: `
     <app-page-header title="Analytics" subtitle="Clinic performance analytics." />
-    <app-admin-nav />
     <div class="mb-4 grid gap-3 rounded-2xl bg-white p-4 shadow-soft md:grid-cols-5">
-      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm" type="date" [(ngModel)]="filters.date_from" />
-      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm" type="date" [(ngModel)]="filters.date_to" />
-      <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="Doctor ID (optional)" [(ngModel)]="filters.doctor_id" />
+      <input
+        class="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+        type="date"
+        [(ngModel)]="filters.date_from"
+      />
+      <input
+        class="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+        type="date"
+        [(ngModel)]="filters.date_to"
+      />
+      <input
+        class="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+        placeholder="Doctor ID (optional)"
+        [(ngModel)]="filters.doctor_id"
+      />
       <select class="rounded-lg border border-slate-200 px-3 py-2 text-sm" [(ngModel)]="groupBy">
         <option value="day">Day</option>
         <option value="week">Week</option>
@@ -36,19 +61,27 @@ Chart.register(...registerables);
     <div class="grid gap-4 md:grid-cols-4">
       <div class="card-surface p-4">
         <p class="text-xs uppercase text-slate-500">Total all time</p>
-        <p class="mt-2 text-2xl font-semibold">{{ metricValue(['total_all_time', 'total_appointments', 'total']) }}</p>
+        <p class="mt-2 text-2xl font-semibold">
+          {{ metricValue(['total_all_time', 'total_appointments', 'total']) }}
+        </p>
       </div>
       <div class="card-surface p-4">
         <p class="text-xs uppercase text-slate-500">This week</p>
-        <p class="mt-2 text-2xl font-semibold">{{ metricValue(['total_this_week', 'appointments_this_week']) }}</p>
+        <p class="mt-2 text-2xl font-semibold">
+          {{ metricValue(['total_this_week', 'appointments_this_week']) }}
+        </p>
       </div>
       <div class="card-surface p-4">
         <p class="text-xs uppercase text-slate-500">This month</p>
-        <p class="mt-2 text-2xl font-semibold">{{ metricValue(['total_this_month', 'appointments_this_month']) }}</p>
+        <p class="mt-2 text-2xl font-semibold">
+          {{ metricValue(['total_this_month', 'appointments_this_month']) }}
+        </p>
       </div>
       <div class="card-surface p-4">
         <p class="text-xs uppercase text-slate-500">No-show rate</p>
-        <p class="mt-2 text-2xl font-semibold">{{ metricValue(['no_show_rate', 'noshow_rate']) }}%</p>
+        <p class="mt-2 text-2xl font-semibold">
+          {{ metricValue(['no_show_rate', 'noshow_rate']) }}%
+        </p>
       </div>
     </div>
 
@@ -93,13 +126,15 @@ Chart.register(...registerables);
           }
           @if (byDoctorRows.length === 0) {
             <tr class="border-t border-slate-100">
-              <td class="py-3 text-slate-500" colspan="6">No doctor statistics available for the selected filters.</td>
+              <td class="py-3 text-slate-500" colspan="6">
+                No doctor statistics available for the selected filters.
+              </td>
             </tr>
           }
         </tbody>
       </table>
     </div>
-  `
+  `,
 })
 export class AdminAnalyticsPage implements AfterViewInit, OnDestroy {
   private static readonly ANALYTICS_CACHE_KEY = 'mf_admin_analytics_cache_v1';
@@ -137,17 +172,21 @@ export class AdminAnalyticsPage implements AfterViewInit, OnDestroy {
 
     forkJoin({
       summary: this.adminService.analytics(this.filters).pipe(catchError(() => of(null))),
-      peak: this.adminService.analyticsPeakHours(this.filters).pipe(catchError(() => of({ items: [] } as AnalyticsPeakHours))),
-      byDoctor: this.adminService.analyticsByDoctor(this.filters).pipe(catchError(() => of({ items: [] } as AnalyticsByDoctor))),
+      peak: this.adminService
+        .analyticsPeakHours(this.filters)
+        .pipe(catchError(() => of({ items: [] } as AnalyticsPeakHours))),
+      byDoctor: this.adminService
+        .analyticsByDoctor(this.filters)
+        .pipe(catchError(() => of({ items: [] } as AnalyticsByDoctor))),
       noShow: this.adminService
         .analyticsNoShowRate({ ...this.filters, group_by: this.groupBy })
-        .pipe(catchError(() => of({ group_by: this.groupBy, items: [] } as AnalyticsNoShowRate)))
+        .pipe(catchError(() => of({ group_by: this.groupBy, items: [] } as AnalyticsNoShowRate))),
     }).subscribe({
       next: ({ summary, peak, byDoctor, noShow }) => {
         this.summary = summary as AnalyticsSummary | null;
         this.byDoctor = byDoctor;
         this.byDoctorRows = this.normalizeByDoctorRows(byDoctor);
-        this.renderCharts((summary ?? { status_breakdown: {} } as AnalyticsSummary), peak, noShow);
+        this.renderCharts(summary ?? ({ status_breakdown: {} } as AnalyticsSummary), peak, noShow);
         this.isLoading = false;
         this.errorText = summary ? null : 'Some analytics endpoints failed to load.';
         this.saveCachedAnalytics({
@@ -163,11 +202,15 @@ export class AdminAnalyticsPage implements AfterViewInit, OnDestroy {
         this.errorText = this.readError(error, 'Unable to load analytics.');
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
-  private renderCharts(summary: AnalyticsSummary, peak: AnalyticsPeakHours, noShow: AnalyticsNoShowRate): void {
+  private renderCharts(
+    summary: AnalyticsSummary,
+    peak: AnalyticsPeakHours,
+    noShow: AnalyticsNoShowRate,
+  ): void {
     this.destroyCharts();
 
     if (this.statusChartRef) {
@@ -178,9 +221,9 @@ export class AdminAnalyticsPage implements AfterViewInit, OnDestroy {
         type: 'bar',
         data: {
           labels,
-          datasets: [{ label: 'Appointments', data: values }]
+          datasets: [{ label: 'Appointments', data: values }],
         },
-        options: { responsive: true }
+        options: { responsive: true },
       });
     }
 
@@ -190,9 +233,9 @@ export class AdminAnalyticsPage implements AfterViewInit, OnDestroy {
         type: 'bar',
         data: {
           labels: peakItems.map((item) => String(item.hour)),
-          datasets: [{ label: 'Count', data: peakItems.map((item) => item.count) }]
+          datasets: [{ label: 'Count', data: peakItems.map((item) => item.count) }],
         },
-        options: { responsive: true }
+        options: { responsive: true },
       });
     }
 
@@ -202,9 +245,14 @@ export class AdminAnalyticsPage implements AfterViewInit, OnDestroy {
         type: 'line',
         data: {
           labels: trendItems.map((item) => String(item['period'])),
-          datasets: [{ label: 'No-show rate %', data: trendItems.map((item) => Number(item['no_show_rate'] ?? 0)) }]
+          datasets: [
+            {
+              label: 'No-show rate %',
+              data: trendItems.map((item) => Number(item['no_show_rate'] ?? 0)),
+            },
+          ],
         },
-        options: { responsive: true }
+        options: { responsive: true },
       });
     }
   }
@@ -249,7 +297,8 @@ export class AdminAnalyticsPage implements AfterViewInit, OnDestroy {
     if (Array.isArray(fromResults)) return fromResults as Array<Record<string, unknown>>;
     const fromData = raw['data'];
     if (Array.isArray(fromData)) return fromData as Array<Record<string, unknown>>;
-    if (Array.isArray(source as unknown)) return source as unknown as Array<Record<string, unknown>>;
+    if (Array.isArray(source as unknown))
+      return source as unknown as Array<Record<string, unknown>>;
     return [];
   }
 
@@ -347,7 +396,7 @@ export class AdminAnalyticsPage implements AfterViewInit, OnDestroy {
       this.byDoctor = cached.payload.byDoctor;
       this.byDoctorRows = cached.payload.byDoctorRows ?? [];
       this.renderCharts(
-        (cached.payload.summary ?? { status_breakdown: {} } as AnalyticsSummary),
+        cached.payload.summary ?? ({ status_breakdown: {} } as AnalyticsSummary),
         cached.payload.peak,
         cached.payload.noShow,
       );

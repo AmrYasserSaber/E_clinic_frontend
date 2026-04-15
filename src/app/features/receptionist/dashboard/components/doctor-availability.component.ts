@@ -11,8 +11,7 @@ import { DoctorAvailability } from '../dashboard.service';
     <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
       @for (doctor of doctors; track trackByDoctor($index, doctor)) {
         <div
-          class="shrink-0 flex items-center gap-3 bg-surface-container-low px-4 py-3 rounded-lg border-l-4"
-          [ngClass]="borderClass(doctor.status)"
+          class="glass-panel shrink-0 flex items-center gap-3 px-4 py-3 rounded-3xl text-(--color-on-surface)"
         >
           <div>
             <p class="text-sm font-bold text-on-surface">{{ doctor.name }}</p>
@@ -34,14 +33,6 @@ export class DoctorAvailabilityComponent {
     if (status === 'AVAILABLE') return 'Available Now';
     if (status === 'BUSY') return 'In Consultation';
     return 'Away';
-  }
-
-  borderClass(status: DoctorAvailability['status']): string {
-    return status === 'AVAILABLE'
-      ? 'border-primary'
-      : status === 'BUSY'
-        ? 'border-secondary'
-        : 'border-outline-variant';
   }
 
   textClass(status: DoctorAvailability['status']): string {

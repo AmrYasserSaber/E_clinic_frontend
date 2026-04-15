@@ -12,151 +12,213 @@ type AppointmentTab = 'upcoming' | 'past' | 'cancelled';
   standalone: true,
   imports: [RouterLink],
   template: `
-    <div class="mb-8 pt-2">
-      <h2 class="font-headline text-3xl font-extrabold tracking-tight text-slate-900">My Appointments</h2>
-      <p class="mt-2 text-sm font-medium text-slate-500">Manage your health schedule and upcoming clinical visits.</p>
-    </div>
+    <div class="mx-auto w-full max-w-6xl space-y-6 pb-10 pt-2">
+      <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="space-y-1">
+          <h2 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">
+            My Appointments
+          </h2>
+          <p class="text-sm font-medium text-on-surface-variant">
+            Manage your health schedule and upcoming clinical visits.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <a
+            routerLink="/patient/book"
+            class="btn-primary inline-flex items-center gap-2 no-underline"
+          >
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add_circle</span>
+            Book appointment
+          </a>
+        </div>
+      </header>
 
-    <div class="mb-8 flex rounded-2xl bg-slate-200/50 p-1.5">
-      @for (tab of tabs; track tab.id) {
-        <button
-          type="button"
-          class="flex-1 rounded-xl py-2.5 text-sm font-semibold transition"
-          [class.bg-white]="activeTab === tab.id"
-          [class.font-bold]="activeTab === tab.id"
-          [class.text-primary]="activeTab === tab.id"
-          [class.shadow-sm]="activeTab === tab.id"
-          [class.border]="activeTab === tab.id"
-          [class.border-slate-200/30]="activeTab === tab.id"
-          [class.text-slate-500]="activeTab !== tab.id"
-          [class.hover:text-slate-800]="activeTab !== tab.id"
-          (click)="activeTab = tab.id"
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          class="grid w-full grid-cols-3 gap-1 rounded-3xl bg-surface-container-low p-1.5 sm:w-auto"
         >
-          {{ tab.label }}
-        </button>
+          @for (tab of tabs; track tab.id) {
+            <button
+              type="button"
+              class="rounded-2xl px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-center transition hover:bg-surface-container-lowest active:scale-[0.99]"
+              [class.bg-surface-container-lowest]="activeTab === tab.id"
+              [class.shadow-soft]="activeTab === tab.id"
+              [class.text-(--color-primary)]="activeTab === tab.id"
+              [class.text-on-surface-variant]="activeTab !== tab.id"
+              (click)="activeTab = tab.id"
+            >
+              {{ tab.label }}
+            </button>
+          }
+        </div>
+        <div class="text-xs font-semibold text-on-surface-variant">
+          {{ filteredAppointments.length }} result{{ filteredAppointments.length === 1 ? '' : 's' }}
+        </div>
+      </div>
+
+      @if (isLoading) {
+        <div class="card-surface rounded-4xl p-8 text-center text-sm text-on-surface-variant">
+          Loading appointments...
+        </div>
+      } @else if (!filteredAppointments.length) {
+        <div class="card-surface rounded-4xl p-10 text-center">
+          <div
+            class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-3xl bg-surface-container-low"
+          >
+            <span class="material-symbols-outlined text-(--color-primary)" aria-hidden="true"
+              >event</span
+            >
+          </div>
+          <p class="font-headline text-lg font-bold text-on-surface">No appointments here yet</p>
+          <p class="mt-1 text-sm font-medium text-on-surface-variant">
+            Book a visit to see it listed under this tab.
+          </p>
+          <a
+            routerLink="/patient/book"
+            class="btn-primary mt-5 inline-flex items-center gap-2 no-underline"
+          >
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+            Book appointment
+          </a>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 gap-6 pb-24 lg:grid-cols-2">
+          @for (appt of filteredAppointments; track appt.id) {
+            <article
+              class="card-surface overflow-hidden rounded-4xl transition hover:-translate-y-0.5"
+            >
+              <div class="p-6 sm:p-7">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex min-w-0 items-start gap-4">
+                    <div
+                      class="glass-panel grid h-14 w-14 shrink-0 place-items-center rounded-3xl text-base font-bold text-(--color-primary)"
+                    >
+                      {{ initials(appt.doctor.fullName) }}
+                    </div>
+                    <div class="min-w-0">
+                      <h3 class="truncate font-headline text-lg font-bold text-on-surface">
+                        {{ appt.doctor.fullName }}
+                      </h3>
+                      <p class="truncate text-sm font-medium text-on-surface-variant">
+                        {{ appt.doctor.specialty.trim() ? appt.doctor.specialty : 'Physician' }}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    class="glass-panel shrink-0 rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest"
+                    [class]="statusPillClass(appt.status)"
+                  >
+                    {{ statusLabel(appt.status) }}
+                  </span>
+                </div>
+
+                <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div class="flex items-center gap-3 rounded-3xl bg-surface-container-low p-4">
+                    <div class="glass-panel grid h-10 w-10 shrink-0 place-items-center rounded-2xl">
+                      <span
+                        class="material-symbols-outlined text-(--color-primary)"
+                        aria-hidden="true"
+                        >calendar_today</span
+                      >
+                    </div>
+                    <div class="min-w-0">
+                      <span
+                        class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant"
+                        >Date</span
+                      >
+                      <div class="truncate text-sm font-bold text-on-surface">
+                        {{ formatDisplayDate(appt.date) }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3 rounded-3xl bg-surface-container-low p-4">
+                    <div class="glass-panel grid h-10 w-10 shrink-0 place-items-center rounded-2xl">
+                      <span
+                        class="material-symbols-outlined text-(--color-primary)"
+                        aria-hidden="true"
+                        >schedule</span
+                      >
+                    </div>
+                    <div class="min-w-0">
+                      <span
+                        class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant"
+                        >Time</span
+                      >
+                      <div class="truncate text-sm font-bold text-on-surface">
+                        {{ formatDisplayTime(appt.time) }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                @if (appt.reason.trim()) {
+                  <div
+                    class="mt-4 rounded-3xl bg-surface-container-low p-4 text-sm text-on-surface-variant"
+                  >
+                    {{ appt.reason }}
+                  </div>
+                }
+
+                <div class="mt-5 flex flex-wrap items-center gap-3">
+                  @if (canReschedule(appt) || canCancel(appt)) {
+                    @if (canReschedule(appt)) {
+                      <a
+                        [routerLink]="['/patient/book']"
+                        [queryParams]="{ rescheduleId: appt.id }"
+                        class="min-w-0 flex-1 rounded-3xl bg-primary/10 px-4 py-3 text-center text-sm font-bold text-(--color-primary) no-underline transition hover:bg-primary/15 active:scale-[0.99]"
+                      >
+                        Reschedule
+                      </a>
+                    }
+                    @if (canCancel(appt)) {
+                      <button
+                        type="button"
+                        class="min-w-0 flex-1 rounded-3xl bg-error/10 px-4 py-3 text-sm font-bold text-error transition hover:bg-error/15 active:scale-[0.99] disabled:opacity-60"
+                        [disabled]="cancellingId === appt.id"
+                        (click)="cancelAppointment(appt)"
+                      >
+                        {{ cancellingId === appt.id ? 'Cancelling...' : 'Cancel' }}
+                      </button>
+                    }
+                  } @else {
+                    <span class="min-w-0 flex-1 text-sm text-on-surface-variant"
+                      >No actions for this visit.</span
+                    >
+                  }
+                  <div class="ml-auto flex items-center">
+                    <div
+                      class="flex h-12 w-12 shrink-0 items-center justify-center rounded-3xl bg-linear-to-br from-(--color-primary) to-(--color-primary-container) text-white shadow-soft"
+                      [attr.title]="
+                        appt.status === 'CONFIRMED' || appt.status === 'CHECKED_IN'
+                          ? 'Confirmed visit'
+                          : 'Appointment'
+                      "
+                    >
+                      <span class="material-symbols-outlined">event_available</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          }
+
+          <a
+            routerLink="/patient/book"
+            class="card-surface lg:col-span-2 flex w-full flex-col items-center justify-center rounded-4xl bg-surface-container-low p-10 text-center no-underline transition hover:bg-surface-container-high"
+          >
+            <div class="glass-panel mb-4 grid h-14 w-14 place-items-center rounded-3xl">
+              <span class="material-symbols-outlined text-3xl text-(--color-primary)">add</span>
+            </div>
+            <p class="mb-1 font-headline text-base font-bold text-on-surface">
+              Schedule a new checkup
+            </p>
+            <p class="max-w-[220px] text-xs font-medium text-on-surface-variant">
+              Keep your health in check by booking your next visit today.
+            </p>
+          </a>
+        </div>
       }
     </div>
-
-    @if (isLoading) {
-      <div class="rounded-2xl bg-white p-6 text-center text-sm text-slate-500 shadow-[0_10px_25px_-5px_rgba(0,100,121,0.08)]">
-        Loading appointments...
-      </div>
-    } @else if (!filteredAppointments.length) {
-      <div class="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center">
-        <p class="font-bold text-slate-900">No appointments here yet</p>
-        <p class="mt-1 text-sm text-slate-500">Book a visit to see it listed under this tab.</p>
-        <a routerLink="/patient/book" class="btn-primary mt-4 inline-block no-underline">Book appointment</a>
-      </div>
-    } @else {
-      <div class="space-y-6 pb-28">
-        @for (appt of filteredAppointments; track appt.id) {
-          <article
-            class="overflow-hidden rounded-2xl bg-white transition hover:-translate-y-0.5"
-            style="box-shadow: 0 10px 25px -5px rgba(0, 100, 121, 0.08), 0 8px 10px -6px rgba(0, 100, 121, 0.05);"
-          >
-            <div class="p-6">
-              <div class="mb-6 flex items-start justify-between gap-3">
-                <div class="flex gap-4">
-                  <div
-                    class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-primary/10 bg-primary-container/15 text-lg font-bold text-primary"
-                  >
-                    {{ initials(appt.doctor.fullName) }}
-                  </div>
-                  <div>
-                    <h3 class="font-headline text-lg font-bold text-slate-900">{{ appt.doctor.fullName }}</h3>
-                    <p class="text-sm font-medium text-slate-500">
-                      {{ appt.doctor.specialty.trim() ? appt.doctor.specialty : 'Physician' }}
-                    </p>
-                  </div>
-                </div>
-                <span
-                  class="rounded-full border px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest"
-                  [class]="statusPillClass(appt.status)"
-                >
-                  {{ statusLabel(appt.status) }}
-                </span>
-              </div>
-
-              <div class="mb-6 grid grid-cols-2 gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-primary shadow-sm"
-                  >
-                    <span class="material-symbols-outlined text-lg">calendar_today</span>
-                  </div>
-                  <div class="flex min-w-0 flex-col">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Date</span>
-                    <span class="text-sm font-bold text-slate-900">{{ formatDisplayDate(appt.date) }}</span>
-                  </div>
-                </div>
-                <div class="flex items-center gap-3">
-                  <div
-                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-primary shadow-sm"
-                  >
-                    <span class="material-symbols-outlined text-lg">schedule</span>
-                  </div>
-                  <div class="flex min-w-0 flex-col">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Time</span>
-                    <span class="text-sm font-bold text-slate-900">{{ formatDisplayTime(appt.time) }}</span>
-                  </div>
-                </div>
-              </div>
-
-              @if (appt.reason.trim()) {
-                <p class="mb-4 text-sm text-slate-600">{{ appt.reason }}</p>
-              }
-
-              <div class="flex gap-3">
-                @if (canReschedule(appt) || canCancel(appt)) {
-                  @if (canReschedule(appt)) {
-                    <a
-                      [routerLink]="['/patient/book']"
-                      [queryParams]="{ rescheduleId: appt.id }"
-                      class="min-w-0 flex-1 rounded-xl bg-slate-100 py-3 text-center text-sm font-bold text-slate-900 no-underline transition hover:bg-slate-200"
-                    >
-                      Reschedule
-                    </a>
-                  }
-                  @if (canCancel(appt)) {
-                    <button
-                      type="button"
-                      class="min-w-0 flex-1 rounded-xl bg-slate-100 py-3 text-sm font-bold text-slate-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
-                      [disabled]="cancellingId === appt.id"
-                      (click)="cancelAppointment(appt)"
-                    >
-                      {{ cancellingId === appt.id ? 'Cancelling...' : 'Cancel' }}
-                    </button>
-                  }
-                } @else {
-                  <span class="min-w-0 flex-1 text-sm text-slate-400">No actions for this visit.</span>
-                }
-                <div
-                  class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#006479] to-[#0098b8] text-white shadow-lg shadow-primary/25"
-                  [attr.title]="appt.status === 'CONFIRMED' || appt.status === 'CHECKED_IN' ? 'Confirmed visit' : 'Appointment'"
-                >
-                  <span class="material-symbols-outlined">event_available</span>
-                </div>
-              </div>
-            </div>
-          </article>
-        }
-
-        <a
-          routerLink="/patient/book"
-          class="flex w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-8 text-center no-underline transition hover:bg-primary/10"
-        >
-          <div
-            class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-md transition group-hover:scale-110"
-          >
-            <span class="material-symbols-outlined text-3xl text-primary">add</span>
-          </div>
-          <p class="mb-1 text-base font-bold text-slate-900">Schedule a new checkup</p>
-          <p class="max-w-[220px] text-xs font-medium text-slate-500">
-            Keep your health in check by booking your next visit today.
-          </p>
-        </a>
-      </div>
-    }
   `,
 })
 export class MyAppointmentsPage implements OnInit {
@@ -235,23 +297,27 @@ export class MyAppointmentsPage implements OnInit {
     switch (status) {
       case 'CONFIRMED':
       case 'CHECKED_IN':
-        return 'border-primary/20 bg-primary/10 text-primary';
+        return 'text-(--color-primary)';
       case 'REQUESTED':
-        return 'border-amber-200 bg-amber-100 text-amber-800';
+        return 'text-(--color-on-surface-variant)';
       case 'COMPLETED':
-        return 'border-emerald-200 bg-emerald-100 text-emerald-800';
+        return 'text-(--color-secondary)';
       case 'CANCELLED':
       case 'NO_SHOW':
-        return 'border-rose-200 bg-rose-100 text-rose-800';
+        return 'text-(--color-error)';
       default:
-        return 'border-slate-200 bg-slate-100 text-slate-700';
+        return 'text-(--color-on-surface-variant)';
     }
   }
 
   protected formatDisplayDate(isoDate: string): string {
     const [y, m, d] = isoDate.split('-').map((n) => Number(n));
     const date = new Date(y, (m || 1) - 1, d || 1);
-    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(date);
   }
 
   protected formatDisplayTime(time: string): string {
@@ -264,9 +330,13 @@ export class MyAppointmentsPage implements OnInit {
   }
 
   protected initials(name: string): string {
-    const parts = name.replace(/^Dr\.\s*/i, '').trim().split(/\s+/).filter(Boolean);
+    const parts = name
+      .replace(/^Dr\.\s*/i, '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
     const a = parts[0]?.[0] ?? '?';
-    const b = parts.length > 1 ? parts[parts.length - 1][0] : parts[0]?.[1] ?? '';
+    const b = parts.length > 1 ? parts[parts.length - 1][0] : (parts[0]?.[1] ?? '');
     return (a + b).toUpperCase();
   }
 

@@ -5,7 +5,6 @@ import { finalize } from 'rxjs';
 import { AdminRole, AdminService, AdminUserRow } from '../../services/admin.service';
 import { ToastService } from '../../core/toast/toast.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
-import { AdminNavComponent } from './admin-nav.component';
 
 type UserFormState = {
   first_name: string;
@@ -35,23 +34,20 @@ type PrefetchEntry = {
 
 @Component({
   standalone: true,
-  imports: [PageHeaderComponent, FormsModule, AdminNavComponent],
+  imports: [PageHeaderComponent, FormsModule],
   template: `
     <app-page-header title="User Management" subtitle="Manage roles and active states." />
-    <app-admin-nav />
 
-    <div class="mb-4 grid gap-3 rounded-2xl bg-white p-4 shadow-soft md:grid-cols-5">
+    <div
+      class="mb-4 grid gap-3 rounded-3xl bg-surface-container-lowest p-4 shadow-soft md:grid-cols-5"
+    >
       <input
-        class="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+        class="input-ui"
         placeholder="Search by name or email"
         [(ngModel)]="filters.search"
         (ngModelChange)="onFilterInputChanged()"
       />
-      <select
-        class="rounded-lg border border-slate-200 px-3 py-2 text-sm"
-        [(ngModel)]="filters.role"
-        (ngModelChange)="onFilterInputChanged()"
-      >
+      <select class="input-ui" [(ngModel)]="filters.role" (ngModelChange)="onFilterInputChanged()">
         <option value="">All roles</option>
         <option value="admin">Admin</option>
         <option value="doctor">Doctor</option>
@@ -59,7 +55,7 @@ type PrefetchEntry = {
         <option value="patient">Patient</option>
       </select>
       <select
-        class="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+        class="input-ui"
         [(ngModel)]="filters.is_active"
         (ngModelChange)="onFilterInputChanged()"
       >
@@ -72,10 +68,17 @@ type PrefetchEntry = {
     </div>
 
     @if (createSuccessNotice) {
-      <div class="mb-4 flex items-start gap-3 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
-        <span class="material-symbols-outlined mt-0.5 shrink-0 text-lg text-emerald-600">check_circle</span>
+      <div
+        class="ghost-outline mb-4 flex items-start gap-3 rounded-2xl bg-secondary/10 px-4 py-3 text-sm font-medium text-secondary"
+      >
+        <span class="material-symbols-outlined mt-0.5 shrink-0 text-lg text-secondary"
+          >check_circle</span
+        >
         <span>{{ createSuccessNotice }}</span>
-        <button class="ml-auto shrink-0 text-emerald-500 hover:text-emerald-700" (click)="createSuccessNotice = null">
+        <button
+          class="ml-auto shrink-0 text-secondary hover:opacity-80"
+          (click)="createSuccessNotice = null"
+        >
           <span class="material-symbols-outlined text-lg">close</span>
         </button>
       </div>
@@ -98,31 +101,31 @@ type PrefetchEntry = {
         <tbody>
           @if (isLoading && users.length === 0) {
             @for (row of skeletonRows; track row) {
-              <tr class="border-t border-slate-100">
+              <tr class="border-t border-outline-variant/15">
                 <td class="py-3">
-                  <div class="h-4 w-36 animate-pulse rounded bg-slate-100"></div>
+                  <div class="h-4 w-36 animate-pulse rounded bg-surface-container-low"></div>
                 </td>
                 <td class="py-3">
-                  <div class="h-4 w-44 animate-pulse rounded bg-slate-100"></div>
+                  <div class="h-4 w-44 animate-pulse rounded bg-surface-container-low"></div>
                 </td>
                 <td class="py-3">
-                  <div class="h-4 w-20 animate-pulse rounded bg-slate-100"></div>
+                  <div class="h-4 w-20 animate-pulse rounded bg-surface-container-low"></div>
                 </td>
                 <td class="py-3">
-                  <div class="h-4 w-12 animate-pulse rounded bg-slate-100"></div>
+                  <div class="h-4 w-12 animate-pulse rounded bg-surface-container-low"></div>
                 </td>
                 <td class="py-3">
-                  <div class="h-8 w-32 animate-pulse rounded bg-slate-100"></div>
+                  <div class="h-8 w-32 animate-pulse rounded bg-surface-container-low"></div>
                 </td>
               </tr>
             }
           } @else if (users.length === 0) {
-            <tr class="border-t border-slate-100">
-              <td class="py-3 text-slate-500" colspan="5">No users to display.</td>
+            <tr class="border-t border-outline-variant/15">
+              <td class="py-3 text-on-surface-variant" colspan="5">No users to display.</td>
             </tr>
           } @else {
             @for (user of users; track user.id) {
-              <tr class="border-t border-slate-100">
+              <tr class="border-t border-outline-variant/15">
                 <td class="py-2">{{ displayName(user) }}</td>
                 <td class="py-2">{{ user.email }}</td>
                 <td class="py-2">{{ user.role }}</td>
@@ -130,7 +133,13 @@ type PrefetchEntry = {
                 <td class="py-2">
                   <div class="flex gap-2">
                     <button class="btn-secondary" (click)="openEditModal(user)">Edit</button>
-                    <button class="btn-secondary" (click)="deactivate(user)" [disabled]="!user.is_active || deactivatingUserId === user.id">{{ deactivatingUserId === user.id ? 'Deactivating...' : 'Deactivate' }}</button>
+                    <button
+                      class="btn-secondary"
+                      (click)="deactivate(user)"
+                      [disabled]="!user.is_active || deactivatingUserId === user.id"
+                    >
+                      {{ deactivatingUserId === user.id ? 'Deactivating...' : 'Deactivate' }}
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -139,49 +148,71 @@ type PrefetchEntry = {
         </tbody>
       </table>
       <div class="mt-3 flex items-center justify-between text-sm">
-        <p class="text-slate-500">Showing {{ users.length }} of {{ totalCount }} users</p>
+        <p class="text-on-surface-variant">Showing {{ users.length }} of {{ totalCount }} users</p>
         @if (showRefreshing) {
-          <p class="text-xs text-slate-500">Refreshing...</p>
+          <p class="text-xs text-on-surface-variant">Refreshing...</p>
         }
         <div class="flex gap-2">
-          <button class="btn-secondary" [disabled]="page <= 1" (click)="changePage(page - 1)">Previous</button>
-          <button class="btn-secondary" [disabled]="!hasNextPage" (click)="changePage(page + 1)">Next</button>
+          <button class="btn-secondary" [disabled]="page <= 1" (click)="changePage(page - 1)">
+            Previous
+          </button>
+          <button class="btn-secondary" [disabled]="!hasNextPage" (click)="changePage(page + 1)">
+            Next
+          </button>
         </div>
       </div>
     </div>
 
     @if (showModal) {
       <div class="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4">
-        <div class="w-full max-w-2xl rounded-2xl bg-white p-5 shadow-xl">
-          <h3 class="mb-4 text-lg font-semibold">{{ editingUserId ? 'Edit User' : 'Create User' }}</h3>
+        <div class="card-surface w-full max-w-2xl rounded-3xl p-5">
+          <h3 class="mb-4 text-lg font-semibold">
+            {{ editingUserId ? 'Edit User' : 'Create User' }}
+          </h3>
           <div class="grid gap-3 md:grid-cols-2">
-            <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="First name" [(ngModel)]="form.first_name" />
-            <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="Last name" [(ngModel)]="form.last_name" />
-            <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm md:col-span-2" placeholder="Email" [(ngModel)]="form.email" />
-            <select class="rounded-lg border border-slate-200 px-3 py-2 text-sm" [(ngModel)]="form.role">
+            <input class="input-ui" placeholder="First name" [(ngModel)]="form.first_name" />
+            <input class="input-ui" placeholder="Last name" [(ngModel)]="form.last_name" />
+            <input class="input-ui md:col-span-2" placeholder="Email" [(ngModel)]="form.email" />
+            <select class="input-ui" [(ngModel)]="form.role">
               <option value="admin">Admin</option>
               <option value="doctor">Doctor</option>
               <option value="receptionist">Receptionist</option>
               <option value="patient">Patient</option>
             </select>
-            <select class="rounded-lg border border-slate-200 px-3 py-2 text-sm" [(ngModel)]="form.is_active">
+            <select class="input-ui" [(ngModel)]="form.is_active">
               <option [ngValue]="true">Active</option>
               <option [ngValue]="false">Inactive</option>
             </select>
-            <select class="rounded-lg border border-slate-200 px-3 py-2 text-sm" [(ngModel)]="form.is_approved">
+            <select class="input-ui" [(ngModel)]="form.is_approved">
               <option [ngValue]="true">Approved</option>
               <option [ngValue]="false">Pending approval</option>
             </select>
-            <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="Phone number" [(ngModel)]="form.phone_number" />
-            <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm" type="date" placeholder="Date of birth" [(ngModel)]="form.date_of_birth" />
+            <input class="input-ui" placeholder="Phone number" [(ngModel)]="form.phone_number" />
+            <input
+              class="input-ui"
+              type="date"
+              placeholder="Date of birth"
+              [(ngModel)]="form.date_of_birth"
+            />
             @if (form.role === 'doctor') {
-              <input class="rounded-lg border border-slate-200 px-3 py-2 text-sm md:col-span-2" placeholder="Specialty" [(ngModel)]="form.specialty" />
+              <input
+                class="input-ui md:col-span-2"
+                placeholder="Specialty"
+                [(ngModel)]="form.specialty"
+              />
             }
           </div>
           @if (!editingUserId) {
-            <p class="mt-3 flex items-start gap-2 rounded-lg bg-sky-50 px-3 py-2 text-xs font-medium text-sky-700">
-              <span class="material-symbols-outlined mt-px shrink-0 text-sm">info</span>
-              <span>No password needed — the user will receive an OTP email to set their own password.</span>
+            <p
+              class="ghost-outline mt-3 flex items-start gap-2 rounded-2xl bg-surface-container-low px-3 py-2 text-xs font-medium text-on-surface-variant"
+            >
+              <span class="material-symbols-outlined mt-px shrink-0 text-sm text-(--color-primary)"
+                >info</span
+              >
+              <span
+                >No password needed — the user will receive an OTP email to set their own
+                password.</span
+              >
             </p>
           }
           @if (modalError) {
@@ -194,7 +225,7 @@ type PrefetchEntry = {
         </div>
       </div>
     }
-  `
+  `,
 })
 export class UserManagementPage {
   private static readonly USERS_CACHE_KEY = 'mf_admin_users_cache';
@@ -229,7 +260,7 @@ export class UserManagementPage {
   } = {
     search: '',
     role: '',
-    is_active: ''
+    is_active: '',
   };
   private appliedFilters: {
     search: string;
@@ -238,7 +269,7 @@ export class UserManagementPage {
   } = {
     search: '',
     role: '',
-    is_active: ''
+    is_active: '',
   };
   private activeQuery: UserListQuery = {
     search: '',
@@ -310,7 +341,7 @@ export class UserManagementPage {
       role: user.role ?? 'patient',
       specialty: user.specialty ?? '',
       is_active: user.is_active,
-      is_approved: user.is_approved
+      is_approved: user.is_approved,
     };
     this.modalError = null;
     this.showModal = true;
@@ -345,7 +376,7 @@ export class UserManagementPage {
       error: (error: unknown) => {
         this.modalError = this.readErrorMessage(error, 'Unable to save user.');
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -353,20 +384,23 @@ export class UserManagementPage {
     this.deactivatingUserId = user.id;
     this.cdr.markForCheck();
 
-    this.adminService.deactivateUser(user.id).pipe(
-      finalize(() => {
-        this.deactivatingUserId = null;
-        this.cdr.markForCheck();
-      })
-    ).subscribe({
-      next: () => {
-        this.toast.success(`${this.displayName(user)} has been deactivated.`);
-        this.fetchUsers(this.activeQuery);
-      },
-      error: (error: unknown) => {
-        this.toast.error(this.readErrorMessage(error, 'Unable to deactivate user.'));
-      }
-    });
+    this.adminService
+      .deactivateUser(user.id)
+      .pipe(
+        finalize(() => {
+          this.deactivatingUserId = null;
+          this.cdr.markForCheck();
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.toast.success(`${this.displayName(user)} has been deactivated.`);
+          this.fetchUsers(this.activeQuery);
+        },
+        error: (error: unknown) => {
+          this.toast.error(this.readErrorMessage(error, 'Unable to deactivate user.'));
+        },
+      });
   }
 
   protected displayName(user: AdminUserRow): string {
@@ -409,77 +443,82 @@ export class UserManagementPage {
     }
     this.cdr.markForCheck();
 
-    this.adminService.users({
-      search: query.search,
-      role: query.role,
-      is_active: query.is_active,
-      page: String(query.page),
-      page_size: String(query.pageSize)
-    }).pipe(
-      finalize(() => {
-        if (currentRequestVersion === this.requestVersion) {
-          this.isLoading = false;
-          this.showRefreshing = false;
-          if (this.refreshIndicatorTimer) {
-            clearTimeout(this.refreshIndicatorTimer);
-            this.refreshIndicatorTimer = null;
+    this.adminService
+      .users({
+        search: query.search,
+        role: query.role,
+        is_active: query.is_active,
+        page: String(query.page),
+        page_size: String(query.pageSize),
+      })
+      .pipe(
+        finalize(() => {
+          if (currentRequestVersion === this.requestVersion) {
+            this.isLoading = false;
+            this.showRefreshing = false;
+            if (this.refreshIndicatorTimer) {
+              clearTimeout(this.refreshIndicatorTimer);
+              this.refreshIndicatorTimer = null;
+            }
+            this.cdr.markForCheck();
+          }
+        }),
+      )
+      .subscribe({
+        next: (response) => {
+          if (currentRequestVersion !== this.requestVersion) return;
+          this.loadError = null;
+          this.users = response.results;
+          this.totalCount = response.count;
+          this.hasNextPage = Boolean(response.next);
+          this.page = query.page;
+          localStorage.setItem(
+            UserManagementPage.USERS_CACHE_KEY,
+            JSON.stringify({
+              users: response.results,
+              totalCount: response.count,
+              hasNextPage: Boolean(response.next),
+              filterKey: this.filterKey(query),
+              cachedAt: Date.now(),
+              query,
+            }),
+          );
+          this.cdr.markForCheck();
+        },
+        error: (error: unknown) => {
+          if (currentRequestVersion !== this.requestVersion) return;
+          this.loadError = this.readErrorMessage(error, 'Unable to load users right now.');
+          if (this.users.length === 0) {
+            this.totalCount = 0;
+            this.hasNextPage = false;
           }
           this.cdr.markForCheck();
-        }
-      })
-    ).subscribe({
-      next: (response) => {
-        if (currentRequestVersion !== this.requestVersion) return;
-        this.loadError = null;
-        this.users = response.results;
-        this.totalCount = response.count;
-        this.hasNextPage = Boolean(response.next);
-        this.page = query.page;
-        localStorage.setItem(
-          UserManagementPage.USERS_CACHE_KEY,
-          JSON.stringify({
-            users: response.results,
-            totalCount: response.count,
-            hasNextPage: Boolean(response.next),
-            filterKey: this.filterKey(query),
-            cachedAt: Date.now(),
-            query,
-          }),
-        );
-        this.cdr.markForCheck();
-      },
-      error: (error: unknown) => {
-        if (currentRequestVersion !== this.requestVersion) return;
-        this.loadError = this.readErrorMessage(error, 'Unable to load users right now.');
-        if (this.users.length === 0) {
-          this.totalCount = 0;
-          this.hasNextPage = false;
-        }
-        this.cdr.markForCheck();
-      }
-    });
+        },
+      });
   }
 
   private prefetchUsers(query: UserListQuery): void {
     const currentPrefetchVersion = ++this.prefetchRequestVersion;
     const key = this.filterKey(query);
-    this.adminService.users({
-      search: query.search,
-      role: query.role,
-      is_active: query.is_active,
-      page: String(query.page),
-      page_size: String(query.pageSize)
-    }).subscribe({
-      next: (response) => {
-        if (currentPrefetchVersion !== this.prefetchRequestVersion) return;
-        this.prefetchedEntries.set(key, {
-          query,
-          response,
-          cachedAt: Date.now(),
-        });
-      },
-      error: () => {}
-    });
+    this.adminService
+      .users({
+        search: query.search,
+        role: query.role,
+        is_active: query.is_active,
+        page: String(query.page),
+        page_size: String(query.pageSize),
+      })
+      .subscribe({
+        next: (response) => {
+          if (currentPrefetchVersion !== this.prefetchRequestVersion) return;
+          this.prefetchedEntries.set(key, {
+            query,
+            response,
+            cachedAt: Date.now(),
+          });
+        },
+        error: () => {},
+      });
   }
 
   private restoreCachedUsers(): void {
@@ -531,7 +570,7 @@ export class UserManagementPage {
       role: 'patient',
       specialty: '',
       is_active: true,
-      is_approved: true
+      is_approved: true,
     };
   }
 

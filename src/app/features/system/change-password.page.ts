@@ -1,10 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../core/toast/toast.service';
@@ -14,18 +9,17 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
   standalone: true,
   imports: [ReactiveFormsModule, PageHeaderComponent, RouterLink],
   template: `
-    <app-page-header
-      title="Change Password"
-      subtitle="Update your account password."
-    />
+    <app-page-header title="Change Password" subtitle="Update your account password." />
 
     <div class="card-surface mx-auto max-w-lg p-6">
       @if (successMessage()) {
         <div
-          class="mb-5 flex items-start gap-3 rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
+          class="ghost-outline mb-5 flex items-start gap-3 rounded-2xl bg-secondary/10 px-4 py-3 text-sm font-medium text-secondary"
           role="status"
         >
-          <span class="material-symbols-outlined mt-0.5 shrink-0 text-lg text-green-600" aria-hidden="true"
+          <span
+            class="material-symbols-outlined mt-0.5 shrink-0 text-lg text-secondary"
+            aria-hidden="true"
             >check_circle</span
           >
           <span>{{ successMessage() }}</span>
@@ -34,10 +28,12 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 
       @if (errorBanner()) {
         <div
-          class="mb-5 flex items-start gap-3 rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700"
+          class="ghost-outline mb-5 flex items-start gap-3 rounded-2xl bg-error/8 px-4 py-3 text-sm font-medium text-error"
           role="alert"
         >
-          <span class="material-symbols-outlined mt-0.5 shrink-0 text-lg text-rose-500" aria-hidden="true"
+          <span
+            class="material-symbols-outlined mt-0.5 shrink-0 text-lg text-error"
+            aria-hidden="true"
             >error</span
           >
           <span>{{ errorBanner() }}</span>
@@ -46,7 +42,10 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 
       <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-5">
         <div class="space-y-1.5">
-          <label class="block text-sm font-semibold text-slate-700" for="cp-old-pw">
+          <label
+            class="block text-xs font-semibold uppercase tracking-wide text-on-surface-variant"
+            for="cp-old-pw"
+          >
             Current Password
           </label>
           <div class="relative">
@@ -63,7 +62,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
             <button
               type="button"
               (click)="showOld.update(v => !v)"
-              class="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              class="absolute top-1/2 right-3 -translate-y-1/2 text-on-surface-variant hover:text-(--color-on-surface) transition-colors"
               [attr.aria-label]="showOld() ? 'Hide password' : 'Show password'"
             >
               <span class="material-symbols-outlined text-lg">{{
@@ -72,12 +71,15 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
             </button>
           </div>
           @if (fieldError('old_password'); as err) {
-            <p id="cp-old-pw-err" class="text-xs font-medium text-rose-600">{{ err }}</p>
+            <p id="cp-old-pw-err" class="text-xs font-medium text-error">{{ err }}</p>
           }
         </div>
 
         <div class="space-y-1.5">
-          <label class="block text-sm font-semibold text-slate-700" for="cp-new-pw">
+          <label
+            class="block text-xs font-semibold uppercase tracking-wide text-on-surface-variant"
+            for="cp-new-pw"
+          >
             New Password
           </label>
           <div class="relative">
@@ -88,13 +90,15 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
               autocomplete="new-password"
               placeholder="At least 8 characters"
               [attr.aria-invalid]="fieldInvalid('new_password')"
-              [attr.aria-describedby]="fieldError('new_password') ? 'cp-new-pw-err' : 'cp-new-pw-hint'"
+              [attr.aria-describedby]="
+                fieldError('new_password') ? 'cp-new-pw-err' : 'cp-new-pw-hint'
+              "
               class="input-ui pr-10"
             />
             <button
               type="button"
               (click)="showNew.update(v => !v)"
-              class="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              class="absolute top-1/2 right-3 -translate-y-1/2 text-on-surface-variant hover:text-(--color-on-surface) transition-colors"
               [attr.aria-label]="showNew() ? 'Hide password' : 'Show password'"
             >
               <span class="material-symbols-outlined text-lg">{{
@@ -102,16 +106,19 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
               }}</span>
             </button>
           </div>
-          <p id="cp-new-pw-hint" class="text-xs font-medium text-slate-500">
+          <p id="cp-new-pw-hint" class="text-xs font-medium text-on-surface-variant">
             Must be at least 8 characters with a mix of letters and numbers.
           </p>
           @if (fieldError('new_password'); as err) {
-            <p id="cp-new-pw-err" class="text-xs font-medium text-rose-600">{{ err }}</p>
+            <p id="cp-new-pw-err" class="text-xs font-medium text-error">{{ err }}</p>
           }
         </div>
 
         <div class="space-y-1.5">
-          <label class="block text-sm font-semibold text-slate-700" for="cp-confirm-pw">
+          <label
+            class="block text-xs font-semibold uppercase tracking-wide text-on-surface-variant"
+            for="cp-confirm-pw"
+          >
             Confirm New Password
           </label>
           <div class="relative">
@@ -128,7 +135,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
             <button
               type="button"
               (click)="showConfirm.update(v => !v)"
-              class="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              class="absolute top-1/2 right-3 -translate-y-1/2 text-on-surface-variant hover:text-(--color-on-surface) transition-colors"
               [attr.aria-label]="showConfirm() ? 'Hide password' : 'Show password'"
             >
               <span class="material-symbols-outlined text-lg">{{
@@ -137,7 +144,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
             </button>
           </div>
           @if (fieldError('confirm_password'); as err) {
-            <p id="cp-confirm-pw-err" class="text-xs font-medium text-rose-600">{{ err }}</p>
+            <p id="cp-confirm-pw-err" class="text-xs font-medium text-error">{{ err }}</p>
           }
         </div>
 

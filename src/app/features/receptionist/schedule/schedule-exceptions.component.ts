@@ -14,20 +14,6 @@ import { ScheduleService } from './schedule.service';
   imports: [AsyncPipe, ReactiveFormsModule, DatePipe, NgClass],
   templateUrl: './schedule-exceptions.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: [
-    `
-      .neumorphic-inset {
-        box-shadow:
-          inset 4px 4px 8px rgba(0, 0, 0, 0.04),
-          inset -4px -4px 8px rgba(255, 255, 255, 0.8);
-      }
-      .neumorphic-card {
-        box-shadow:
-          4px 4px 12px rgba(0, 0, 0, 0.06),
-          -4px -4px 12px rgba(255, 255, 255, 0.8);
-      }
-    `,
-  ],
 })
 export class ScheduleExceptionsComponent {
   private readonly service = inject(ScheduleService);
@@ -180,8 +166,8 @@ export class ScheduleExceptionsComponent {
     );
     if (!item) return 'bg-surface-container-low';
     return item.exception_type === 'DAY_OFF'
-      ? 'bg-red-100 text-red-700'
-      : 'bg-blue-100 text-blue-700';
+      ? 'bg-error/10 text-error'
+      : 'bg-secondary/10 text-secondary';
   }
 
   monthDays(): string[] {

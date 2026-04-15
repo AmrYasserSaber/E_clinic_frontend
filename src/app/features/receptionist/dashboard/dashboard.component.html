@@ -1,19 +1,31 @@
-<div class="p-6 md:p-10 space-y-8 bg-background text-on-surface font-body min-h-screen">
+<!-- htmlhint attr-lowercase:false -->
+<div class="min-h-screen space-y-8 bg-background p-6 font-body text-on-surface md:p-10">
   @if (vm$ | async; as vm) {
-    <app-dashboard-summary [totalAppointments]="vm.totalAppointments">
+    <app-page-header
+      title="Receptionist Dashboard"
+      subtitle="Track today’s appointments, queue status, and doctor availability."
+    >
+      <div class="flex flex-col items-end gap-2">
+        <span
+          class="glass-panel inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-bold tracking-wide text-on-surface-variant"
+        >
+          <span class="material-symbols-outlined text-[16px] text-(--color-primary)">update</span>
+          Last updated: {{ vm.lastUpdated ? (vm.lastUpdated | date: 'shortTime') : '--' }}
+        </span>
+        <app-quick-actions (refresh)="onRefreshQueue()" />
+      </div>
+    </app-page-header>
+
+    <app-dashboard-summary
+      [totalAppointments]="vm.totalAppointments"
+      [confirmedAppointments]="vm.confirmedAppointments"
+      [checkedInAppointments]="vm.checkedInAppointments"
+      [averageWaitingMinutes]="vm.averageWaitingMinutes"
+    >
       <app-doctor-availability [doctors]="vm.doctors" />
     </app-dashboard-summary>
 
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold tracking-tighter text-primary font-headline">
-        Receptionist Dashboard
-      </h1>
-      <p class="text-xs text-on-surface-variant">
-        Last updated: {{ vm.lastUpdated ? (vm.lastUpdated | date: 'shortTime') : '--' }}
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
       <app-queue-list
         class="contents"
         [items]="vm.queueItems"

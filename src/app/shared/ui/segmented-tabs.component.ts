@@ -4,21 +4,21 @@ import { Component, input, output } from '@angular/core';
   selector: 'app-segmented-tabs',
   standalone: true,
   template: `
-    <div class="inline-flex rounded-full bg-slate-100 p-1">
+    <div class="inline-flex rounded-full bg-surface-container-low p-1">
       @for (item of items(); track item) {
         <button
-          class="rounded-full px-4 py-1.5 text-sm"
-          [class.bg-white]="item === active()"
-          [class.shadow]="item === active()"
-          [class.text-slate-800]="item === active()"
-          [class.text-slate-500]="item !== active()"
+          class="rounded-full px-4 py-1.5 text-sm font-semibold transition"
+          [class.bg-(--color-surface-container-lowest)]="item === active()"
+          [class.shadow-soft]="item === active()"
+          [class.text-(--color-on-surface)]="item === active()"
+          [class.text-(--color-on-surface-variant)]="item !== active()"
           (click)="changed.emit(item)"
         >
           {{ item }}
         </button>
       }
     </div>
-  `
+  `,
 })
 export class SegmentedTabsComponent {
   readonly items = input.required<string[]>();

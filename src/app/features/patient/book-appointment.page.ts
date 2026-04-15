@@ -19,177 +19,319 @@ type CalendarDay = {
   standalone: true,
   imports: [PageHeaderComponent],
   template: `
-    <app-page-header
-      [title]="isRescheduleMode ? 'Reschedule Appointment' : 'Book Appointment'"
-      [subtitle]="
-        isRescheduleMode
-          ? 'Pick a new date and time. Your visit stays with the same doctor unless you change availability elsewhere.'
-          : 'Choose a doctor, date, and slot from live availability.'
-      "
-    />
+    <div class="mx-auto w-full max-w-6xl space-y-6 pb-24 pt-2">
+      <app-page-header
+        [title]="isRescheduleMode ? 'Reschedule Appointment' : 'Book Appointment'"
+        [subtitle]="
+          isRescheduleMode
+            ? 'Pick a new date and time. Your visit stays with the same doctor unless you change availability elsewhere.'
+            : 'Choose a doctor, date, and slot from live availability.'
+        "
+      />
 
-    @if (isLoadingRescheduleInit) {
-      <div class="card-surface p-4 text-sm text-slate-600">Loading appointment...</div>
-    } @else if (!selectedDoctor) {
-      <section class="card-surface mb-4 p-4">
-        <p class="mb-2 text-sm font-medium text-slate-600">Find your specialist</p>
-        <input
-          #searchInput
-          class="input-ui"
-          placeholder="Search doctors or specialty"
-          (input)="searchTerm = searchInput.value"
-        />
-      </section>
-
-      @if (isLoadingDoctors) {
-        <div class="card-surface p-4 text-sm text-slate-600">Loading doctors...</div>
-      } @else {
-        <section class="grid gap-4">
-          @for (doctor of filteredDoctors; track doctor.id) {
-            <button class="card-surface p-4 text-left transition hover:bg-cyan-50" (click)="selectDoctor(doctor)">
-              <div class="mb-2 flex items-start justify-between gap-2">
-                <div>
-                  <p class="text-lg font-bold text-slate-900">{{ doctor.name }}</p>
-                  <p class="text-sm font-medium text-cyan-700">{{ doctor.specialty || 'General Practitioner' }}</p>
-                </div>
-                <span
-                  class="rounded-full px-2 py-1 text-xs font-semibold"
-                  [class.bg-emerald-100]="doctor.status === 'AVAILABLE'"
-                  [class.text-emerald-700]="doctor.status === 'AVAILABLE'"
-                  [class.bg-amber-100]="doctor.status === 'BUSY'"
-                  [class.text-amber-700]="doctor.status === 'BUSY'"
-                  [class.bg-slate-200]="doctor.status === 'AWAY'"
-                  [class.text-slate-600]="doctor.status === 'AWAY'"
-                >
-                  {{ statusLabel(doctor.status) }}
-                </span>
+      @if (isLoadingRescheduleInit) {
+        <div class="card-surface rounded-4xl p-8 text-sm text-on-surface-variant">
+          Loading appointment...
+        </div>
+      } @else if (!selectedDoctor) {
+        <section class="card-surface rounded-4xl p-6 sm:p-8">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div class="space-y-1">
+              <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+                Step 1
               </div>
-              <p class="text-xs text-slate-500">Tap to select date and time.</p>
-            </button>
-          }
+              <div class="font-headline text-lg font-extrabold text-on-surface">
+                Choose a doctor
+              </div>
+              <div class="text-sm font-medium text-on-surface-variant">
+                Search by name or specialty, then pick your preferred provider.
+              </div>
+            </div>
+            <div class="w-full sm:w-[360px]">
+              <label
+                class="mb-1 block text-xs font-semibold uppercase tracking-wide text-on-surface-variant"
+              >
+                Search
+              </label>
+              <div class="relative">
+                <span
+                  class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 leading-none text-on-surface-variant"
+                  aria-hidden="true"
+                  >search</span
+                >
+                <input
+                  #searchInput
+                  class="input-ui h-12 w-full pl-11!"
+                  placeholder="Search doctors or specialty"
+                  (input)="searchTerm = searchInput.value"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
 
-          @if (!filteredDoctors.length) {
-            <div class="card-surface p-4 text-sm text-slate-600">No doctors match your search.</div>
-          }
+        @if (isLoadingDoctors) {
+          <div class="card-surface rounded-4xl p-8 text-sm text-on-surface-variant">
+            Loading doctors...
+          </div>
+        } @else {
+          <section class="grid gap-4 lg:grid-cols-2">
+            @for (doctor of filteredDoctors; track doctor.id) {
+              <button
+                class="card-surface group rounded-4xl p-6 text-left transition hover:-translate-y-0.5 hover:bg-surface-container-low"
+                (click)="selectDoctor(doctor)"
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex min-w-0 items-start gap-4">
+                    <div class="glass-panel grid h-12 w-12 shrink-0 place-items-center rounded-3xl">
+                      <span
+                        class="material-symbols-outlined text-(--color-primary)"
+                        aria-hidden="true"
+                        >stethoscope</span
+                      >
+                    </div>
+                    <div class="min-w-0">
+                      <p class="truncate font-headline text-lg font-extrabold text-on-surface">
+                        {{ doctor.name }}
+                      </p>
+                      <p class="truncate text-sm font-semibold text-(--color-primary)">
+                        {{ doctor.specialty || 'General Practitioner' }}
+                      </p>
+                      <p class="mt-2 text-xs font-medium text-on-surface-variant">
+                        Tap to select date and time.
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    class="glass-panel shrink-0 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest"
+                    [class.text-secondary]="doctor.status === 'AVAILABLE'"
+                    [class.text-on-surface-variant]="doctor.status === 'BUSY'"
+                    [class.text-on-surface-variant]="doctor.status === 'AWAY'"
+                  >
+                    {{ statusLabel(doctor.status) }}
+                  </span>
+                </div>
+              </button>
+            }
+
+            @if (!filteredDoctors.length) {
+              <div
+                class="card-surface rounded-4xl p-8 text-sm text-on-surface-variant lg:col-span-2"
+              >
+                No doctors match your search.
+              </div>
+            }
+          </section>
+        }
+      } @else {
+        <section class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div class="flex items-center gap-3">
+            <button
+              class="btn-secondary rounded-xl! inline-flex items-center gap-2"
+              type="button"
+              (click)="backToDoctors()"
+            >
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                >arrow_back</span
+              >
+              <span>{{ isRescheduleMode ? 'Back to appointments' : 'Back' }}</span>
+            </button>
+            <div class="card-surface flex items-center gap-4 rounded-4xl p-5">
+              <div class="glass-panel grid h-12 w-12 place-items-center rounded-3xl">
+                <span class="material-symbols-outlined text-(--color-primary)" aria-hidden="true"
+                  >stethoscope</span
+                >
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+                  {{ selectedDoctor.specialty || 'General Practitioner' }}
+                </p>
+                <p class="truncate font-headline text-lg font-extrabold text-on-surface">
+                  {{ selectedDoctor.name }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <section class="card-surface rounded-4xl p-6 sm:p-8 lg:col-span-7">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div class="space-y-1">
+                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+                  Step 2
+                </div>
+                <h3 class="font-headline text-lg font-extrabold text-on-surface">Select date</h3>
+                <p class="text-sm font-medium text-on-surface-variant">
+                  Choose a day from the calendar to load live slots.
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="btn-secondary" type="button" (click)="changeMonth(-1)">Prev</button>
+                <button class="btn-secondary" type="button" (click)="changeMonth(1)">Next</button>
+              </div>
+            </div>
+
+            <div class="mt-5 flex items-center justify-between">
+              <p class="text-sm font-extrabold text-(--color-primary)">{{ monthLabel }}</p>
+              <span class="text-xs font-semibold text-on-surface-variant">
+                Selected: {{ humanDate(selectedDate) }}
+              </span>
+            </div>
+
+            <div
+              class="mt-5 grid grid-cols-7 gap-2 text-center text-[10px] font-extrabold tracking-widest text-on-surface-variant"
+            >
+              @for (label of weekdays; track label) {
+                <span>{{ label }}</span>
+              }
+            </div>
+            <div class="mt-2 grid grid-cols-7 gap-2">
+              @for (day of calendarDays; track day.iso) {
+                <button
+                  type="button"
+                  class="rounded-2xl px-2 py-2 text-sm font-bold transition active:scale-[0.99]"
+                  [disabled]="day.isPast"
+                  [class.opacity-35]="!day.isCurrentMonth"
+                  [class.cursor-not-allowed]="day.isPast"
+                  [class.bg-surface-container-low]="!isSelectedDate(day.iso)"
+                  [class.hover:bg-surface-container]="!day.isPast && !isSelectedDate(day.iso)"
+                  [class.text-on-surface-variant]="day.isPast"
+                  [class.bg-primary]="isSelectedDate(day.iso)"
+                  [class.text-white]="isSelectedDate(day.iso)"
+                  (click)="selectDate(day)"
+                >
+                  {{ day.dayOfMonth }}
+                </button>
+              }
+            </div>
+          </section>
+
+          <section class="card-surface rounded-4xl p-6 sm:p-8 lg:col-span-5">
+            <div class="flex items-end justify-between gap-3">
+              <div class="space-y-1">
+                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+                  Step 3
+                </div>
+                <h3 class="font-headline text-lg font-extrabold text-on-surface">Pick a slot</h3>
+                <p class="text-sm font-medium text-on-surface-variant">
+                  Morning and afternoon availability updates live.
+                </p>
+              </div>
+            </div>
+
+            @if (isLoadingSlots) {
+              <div
+                class="mt-5 rounded-4xl bg-surface-container-low p-6 text-sm text-on-surface-variant"
+              >
+                Loading slots...
+              </div>
+            } @else {
+              <div class="mt-5 space-y-5">
+                <div>
+                  <div class="mb-2 flex items-center justify-between">
+                    <p
+                      class="text-xs font-extrabold uppercase tracking-widest text-on-surface-variant"
+                    >
+                      Morning
+                    </p>
+                    <p class="text-xs font-semibold text-on-surface-variant">
+                      {{ morningSlots.length }} slot{{ morningSlots.length === 1 ? '' : 's' }}
+                    </p>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    @for (slot of morningSlots; track slot.startTime) {
+                      <button
+                        type="button"
+                        class="rounded-3xl bg-surface-container-low px-3 py-2.5 text-sm font-bold text-on-surface transition hover:bg-surface-container active:scale-[0.99]"
+                        [class.bg-primary]="selectedSlot?.startTime === slot.startTime"
+                        [class.text-white]="selectedSlot?.startTime === slot.startTime"
+                        (click)="selectedSlot = slot"
+                      >
+                        {{ displayTime(slot.startTime) }}
+                      </button>
+                    }
+                    @if (!morningSlots.length) {
+                      <div
+                        class="col-span-2 rounded-3xl bg-surface-container-low p-4 text-sm text-on-surface-variant"
+                      >
+                        No morning slots.
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <div>
+                  <div class="mb-2 flex items-center justify-between">
+                    <p
+                      class="text-xs font-extrabold uppercase tracking-widest text-on-surface-variant"
+                    >
+                      Afternoon
+                    </p>
+                    <p class="text-xs font-semibold text-on-surface-variant">
+                      {{ afternoonSlots.length }} slot{{ afternoonSlots.length === 1 ? '' : 's' }}
+                    </p>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    @for (slot of afternoonSlots; track slot.startTime) {
+                      <button
+                        type="button"
+                        class="rounded-3xl bg-surface-container-low px-3 py-2.5 text-sm font-bold text-on-surface transition hover:bg-surface-container active:scale-[0.99]"
+                        [class.bg-primary]="selectedSlot?.startTime === slot.startTime"
+                        [class.text-white]="selectedSlot?.startTime === slot.startTime"
+                        (click)="selectedSlot = slot"
+                      >
+                        {{ displayTime(slot.startTime) }}
+                      </button>
+                    }
+                    @if (!afternoonSlots.length) {
+                      <div
+                        class="col-span-2 rounded-3xl bg-surface-container-low p-4 text-sm text-on-surface-variant"
+                      >
+                        No afternoon slots.
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </section>
+        </div>
+      }
+
+      @if (selectedDoctor && selectedSlot && selectedDate) {
+        <section class="sticky bottom-3">
+          <div
+            class="glass-panel mx-auto flex max-w-4xl items-center justify-between gap-4 rounded-4xl p-4 shadow-soft"
+          >
+            <div class="min-w-0">
+              <p class="text-xs font-extrabold uppercase tracking-widest text-on-surface-variant">
+                Selection
+              </p>
+              <p class="truncate text-sm font-bold text-on-surface">
+                {{ humanDate(selectedDate) }} · {{ displayTime(selectedSlot.startTime) }}
+              </p>
+            </div>
+            <button
+              class="btn-primary shrink-0 px-5 py-3"
+              type="button"
+              [disabled]="isBooking"
+              (click)="bookSelectedSlot()"
+            >
+              {{
+                isBooking
+                  ? isRescheduleMode
+                    ? 'Rescheduling...'
+                    : 'Booking...'
+                  : isRescheduleMode
+                    ? 'Confirm new time'
+                    : 'Book Appointment'
+              }}
+            </button>
+          </div>
         </section>
       }
-    } @else {
-      <section class="mb-4 flex items-center gap-3">
-        <button class="btn-secondary" type="button" (click)="backToDoctors()">
-          {{ isRescheduleMode ? 'Back to appointments' : 'Back' }}
-        </button>
-        <div class="card-surface flex-1 p-4">
-          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            {{ selectedDoctor.specialty || 'General Practitioner' }}
-          </p>
-          <p class="text-lg font-bold text-slate-900">{{ selectedDoctor.name }}</p>
-        </div>
-      </section>
-
-      <section class="card-surface mb-4 p-4">
-        <div class="mb-4 flex items-center justify-between">
-          <h3 class="text-lg font-bold text-slate-900">Select Date</h3>
-          <div class="flex items-center gap-2">
-            <button class="btn-secondary" type="button" (click)="changeMonth(-1)">Prev</button>
-            <button class="btn-secondary" type="button" (click)="changeMonth(1)">Next</button>
-          </div>
-        </div>
-        <p class="mb-4 text-sm font-semibold text-cyan-800">{{ monthLabel }}</p>
-
-        <div class="mb-2 grid grid-cols-7 gap-2 text-center text-xs font-bold tracking-wide text-slate-400">
-          @for (label of weekdays; track label) {
-            <span>{{ label }}</span>
-          }
-        </div>
-        <div class="grid grid-cols-7 gap-2">
-          @for (day of calendarDays; track day.iso) {
-            <button
-              type="button"
-              class="rounded-lg px-2 py-2 text-sm transition"
-              [disabled]="day.isPast"
-              [class.opacity-35]="!day.isCurrentMonth"
-              [class.cursor-not-allowed]="day.isPast"
-              [class.bg-slate-100]="!isSelectedDate(day.iso)"
-              [class.text-slate-500]="day.isPast"
-              [class.bg-primary]="isSelectedDate(day.iso)"
-              [class.text-white]="isSelectedDate(day.iso)"
-              (click)="selectDate(day)"
-            >
-              {{ day.dayOfMonth }}
-            </button>
-          }
-        </div>
-      </section>
-
-      <section class="card-surface mb-24 p-4">
-        <h3 class="mb-4 text-lg font-bold text-slate-900">Available Slots</h3>
-        @if (isLoadingSlots) {
-          <p class="text-sm text-slate-600">Loading slots...</p>
-        } @else {
-          <div class="mb-5">
-            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Morning</p>
-            <div class="grid grid-cols-2 gap-2 md:grid-cols-3">
-              @for (slot of morningSlots; track slot.startTime) {
-                <button
-                  type="button"
-                  class="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold transition"
-                  [class.bg-primary]="selectedSlot?.startTime === slot.startTime"
-                  [class.text-white]="selectedSlot?.startTime === slot.startTime"
-                  (click)="selectedSlot = slot"
-                >
-                  {{ displayTime(slot.startTime) }}
-                </button>
-              }
-              @if (!morningSlots.length) {
-                <p class="col-span-2 text-sm text-slate-500 md:col-span-3">No morning slots.</p>
-              }
-            </div>
-          </div>
-
-          <div>
-            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Afternoon</p>
-            <div class="grid grid-cols-2 gap-2 md:grid-cols-3">
-              @for (slot of afternoonSlots; track slot.startTime) {
-                <button
-                  type="button"
-                  class="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold transition"
-                  [class.bg-primary]="selectedSlot?.startTime === slot.startTime"
-                  [class.text-white]="selectedSlot?.startTime === slot.startTime"
-                  (click)="selectedSlot = slot"
-                >
-                  {{ displayTime(slot.startTime) }}
-                </button>
-              }
-              @if (!afternoonSlots.length) {
-                <p class="col-span-2 text-sm text-slate-500 md:col-span-3">No afternoon slots.</p>
-              }
-            </div>
-          </div>
-        }
-      </section>
-    }
-
-    @if (selectedDoctor && selectedSlot && selectedDate) {
-      <section class="glass-panel fixed inset-x-0 bottom-0 border-t border-slate-200 p-4">
-        <div class="mx-auto flex max-w-3xl items-center justify-between gap-3">
-          <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Selection</p>
-            <p class="text-sm font-bold text-slate-900">{{ humanDate(selectedDate) }} - {{ displayTime(selectedSlot.startTime) }}</p>
-          </div>
-          <button class="btn-primary" type="button" [disabled]="isBooking" (click)="bookSelectedSlot()">
-            {{
-              isBooking
-                ? isRescheduleMode
-                  ? 'Rescheduling...'
-                  : 'Booking...'
-                : isRescheduleMode
-                  ? 'Confirm new time'
-                  : 'Book Appointment'
-            }}
-          </button>
-        </div>
-      </section>
-    }
+    </div>
   `,
 })
 export class BookAppointmentPage implements OnInit {
@@ -238,7 +380,9 @@ export class BookAppointmentPage implements OnInit {
   }
 
   protected get monthLabel(): string {
-    return new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(this.viewMonth);
+    return new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(
+      this.viewMonth,
+    );
   }
 
   protected get calendarDays(): CalendarDay[] {
@@ -309,19 +453,20 @@ export class BookAppointmentPage implements OnInit {
     if (!this.selectedDoctor || !this.selectedSlot || !this.selectedDate) return;
 
     this.isBooking = true;
-    const req = this.isRescheduleMode && this.rescheduleAppointmentId
-      ? this.appointmentsService.reschedule(this.rescheduleAppointmentId, {
-          doctor_id: this.selectedDoctor.id,
-          date: this.selectedDate,
-          time: this.selectedSlot.startTime,
-          reason: 'Rescheduled by patient',
-        })
-      : this.appointmentsService.book({
-          doctor_id: this.selectedDoctor.id,
-          date: this.selectedDate,
-          time: this.selectedSlot.startTime,
-          reason: 'Consultation',
-        });
+    const req =
+      this.isRescheduleMode && this.rescheduleAppointmentId
+        ? this.appointmentsService.reschedule(this.rescheduleAppointmentId, {
+            doctor_id: this.selectedDoctor.id,
+            date: this.selectedDate,
+            time: this.selectedSlot.startTime,
+            reason: 'Rescheduled by patient',
+          })
+        : this.appointmentsService.book({
+            doctor_id: this.selectedDoctor.id,
+            date: this.selectedDate,
+            time: this.selectedSlot.startTime,
+            reason: 'Consultation',
+          });
 
     req.pipe(finalize(() => (this.isBooking = false))).subscribe({
       next: () => {

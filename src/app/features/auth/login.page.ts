@@ -23,7 +23,7 @@ const REMEMBER_EMAIL_KEY = 'mediflow_remember_email';
         <div class="relative z-10 w-full max-w-md">
           <div class="mb-8 text-center">
             <div
-              class="bg-surface-container-lowest neumorphic-card mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl"
+              class="card-surface mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl"
             >
               <span class="material-symbols-outlined text-primary text-2xl">medical_services</span>
             </div>
@@ -36,14 +36,14 @@ const REMEMBER_EMAIL_KEY = 'mediflow_remember_email';
           </div>
           @if (signupNotice()) {
             <div
-              class="border-outline-variant/20 bg-secondary-fixed/30 text-on-secondary-container mb-4 rounded-2xl border px-4 py-2.5 text-sm font-medium"
+              class="ghost-outline bg-secondary-fixed/30 text-on-secondary-container mb-4 rounded-2xl px-4 py-2.5 text-sm font-medium"
             >
               {{ signupNotice() }}
             </div>
           }
           @if (pendingApprovalNotice()) {
             <div
-              class="border-primary/25 bg-primary/8 mb-4 flex gap-3 rounded-2xl border px-4 py-3"
+              class="ghost-outline bg-primary/8 mb-4 flex gap-3 rounded-2xl px-4 py-3"
               role="status"
             >
               <span
@@ -65,7 +65,7 @@ const REMEMBER_EMAIL_KEY = 'mediflow_remember_email';
               </div>
             </div>
           }
-          <div class="bg-surface-container-lowest neumorphic-card rounded-3xl p-6 md:p-8">
+          <div class="card-surface rounded-3xl p-6 md:p-8">
             <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-5">
               <div class="space-y-2">
                 <label class="text-secondary ml-1 block text-sm font-semibold" for="login-email">
@@ -83,7 +83,7 @@ const REMEMBER_EMAIL_KEY = 'mediflow_remember_email';
                     type="email"
                     autocomplete="email"
                     placeholder="name@example.com"
-                    class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-4 pl-11 transition-all focus:ring-2"
+                    class="input-ui pl-11! pr-4! py-3! placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -103,7 +103,7 @@ const REMEMBER_EMAIL_KEY = 'mediflow_remember_email';
                     [type]="showPassword() ? 'text' : 'password'"
                     autocomplete="current-password"
                     placeholder="••••••••"
-                    class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-11 pl-11 transition-all focus:ring-2"
+                    class="input-ui pl-11! pr-11! py-3! placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                   />
                   <button
                     type="button"
@@ -126,7 +126,7 @@ const REMEMBER_EMAIL_KEY = 'mediflow_remember_email';
                       class="peer absolute inset-0 z-10 cursor-pointer opacity-0"
                     />
                     <div
-                      class="bg-surface-container-low neumorphic-inset peer-checked:bg-primary/10 pointer-events-none h-5 w-5 rounded-md transition-all"
+                      class="bg-surface-container-low pointer-events-none h-5 w-5 rounded-md transition-all peer-checked:bg-primary/10"
                     ></div>
                     <span
                       class="material-symbols-outlined text-primary pointer-events-none absolute inset-0 flex items-center justify-center scale-0 font-bold transition-transform peer-checked:scale-75"
@@ -171,7 +171,7 @@ const REMEMBER_EMAIL_KEY = 'mediflow_remember_email';
               type="button"
               (click)="continueWithGoogle()"
               [disabled]="googleLoading()"
-              class="bg-surface-container-low neumorphic-inset mt-5 flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-3 font-bold text-on-surface transition-all hover:-translate-y-0.5 active:scale-95 disabled:pointer-events-none disabled:opacity-60"
+              class="mt-5 flex w-full items-center justify-center gap-3 rounded-2xl bg-surface-container-low px-5 py-3 font-bold text-on-surface transition-all hover:-translate-y-0.5 active:scale-95 disabled:pointer-events-none disabled:opacity-60"
             >
               <svg class="h-5 w-5" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
                 <path
@@ -193,7 +193,10 @@ const REMEMBER_EMAIL_KEY = 'mediflow_remember_email';
               </svg>
               <span>{{ googleLoading() ? 'Redirecting…' : 'Continue with Google' }}</span>
             </button>
-            <div class="border-outline-variant/10 mt-8 space-y-3 border-t pt-6 text-center">
+            <div class="mt-8 space-y-3 text-center">
+              <div
+                class="mb-5 h-px bg-linear-to-r from-transparent via-outline-variant/20 to-transparent"
+              ></div>
               <p class="text-on-surface-variant text-sm font-medium">
                 Don't have an account?
                 <a

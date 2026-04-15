@@ -30,7 +30,7 @@ type SignupFormValue = {
         <div class="relative z-10 w-full max-w-md">
           <div class="mb-8 text-center">
             <div
-              class="bg-surface-container-lowest neumorphic-card mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl"
+              class="card-surface mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl"
             >
               <span class="material-symbols-outlined text-primary text-2xl">shield</span>
             </div>
@@ -42,10 +42,10 @@ type SignupFormValue = {
             </p>
           </div>
 
-          <div class="bg-surface-container-lowest neumorphic-card rounded-3xl p-6 md:p-8">
+          <div class="card-surface rounded-3xl p-6 md:p-8">
             <div class="flex flex-col items-center gap-3 py-6">
               <div
-                class="border-outline-variant/20 bg-surface-container-low neumorphic-inset flex w-full items-center gap-3 rounded-2xl border px-4 py-3"
+                class="ghost-outline bg-surface-container-low flex w-full items-center gap-3 rounded-2xl px-4 py-3"
               >
                 <span class="material-symbols-outlined text-primary shrink-0 text-xl"
                   >progress_activity</span

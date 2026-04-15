@@ -1,24 +1,24 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { QueueItem } from '../queue.service';
+import { QUEUE_STATUS_UI } from '../../../../shared/ui/queue-status-ui';
+import { TimeFormatPipe } from '../../dashboard/pipes/time-format.pipe';
 
 @Component({
   selector: 'app-queue-item',
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, TimeFormatPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
-      class="bg-surface-container-lowest soft-neumorphic rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-6 group"
+      class="card-surface rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-6 group transition-transform hover:-translate-y-0.5"
       [ngClass]="{
-        'border border-transparent hover:border-primary/10 hover:-translate-y-0.5 transition-transform duration-300':
-          item.status !== 'COMPLETED',
         'opacity-75 grayscale-[0.5] bg-surface-container-low': item.status === 'COMPLETED',
       }"
     >
       <div class="flex items-center gap-5 flex-1">
         <div
-          class="h-16 w-16 rounded-xl overflow-hidden shadow-sm relative bg-primary/10 flex items-center justify-center text-primary font-bold"
+          class="glass-panel h-16 w-16 rounded-3xl overflow-hidden relative flex items-center justify-center text-(--color-primary) font-bold"
         >
           {{ initials(item.patient_name) }}
         </div>
@@ -36,7 +36,7 @@ import { QueueItem } from '../queue.service';
           <div class="flex items-center gap-3 text-sm text-on-surface-variant">
             <span class="flex items-center gap-1"
               ><span class="material-symbols-outlined text-sm">schedule</span>
-              {{ item.appointment_time }}</span
+              {{ item.appointment_time | timeFormat }}</span
             >
             <span class="flex items-center gap-1"
               ><span class="material-symbols-outlined text-sm">medical_information</span>
@@ -56,7 +56,7 @@ import { QueueItem } from '../queue.service';
         <div class="flex gap-2 ml-auto">
           @if (item.status === 'CONFIRMED') {
             <button
-              class="bg-primary text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:opacity-90 active:scale-95 transition-all"
+              class="btn-primary px-5 py-2.5 rounded-2xl text-sm"
               (click)="checkIn.emit(item.id)"
             >
               Check-in
@@ -64,7 +64,7 @@ import { QueueItem } from '../queue.service';
           }
           @if (item.status === 'CHECKED_IN') {
             <button
-              class="p-2.5 rounded-xl text-error hover:bg-error-container/20 transition-colors"
+              class="p-2.5 rounded-2xl text-error hover:bg-error/10 transition-colors"
               (click)="noShow.emit(item.id)"
               title="Mark patient as no-show"
             >
@@ -83,16 +83,11 @@ export class QueueItemComponent {
   @Output() noShow = new EventEmitter<number>();
 
   statusLabel(status: QueueItem['status']): string {
-    if (status === 'CONFIRMED') return 'WAITING';
-    return status;
+    return QUEUE_STATUS_UI[status].label;
   }
 
   statusClass(status: QueueItem['status']): string {
-    if (status === 'CHECKED_IN') return 'bg-primary-container text-primary-fixed-variant';
-    if (status === 'IN_PROGRESS') return 'bg-cyan-50 text-cyan-700';
-    if (status === 'COMPLETED') return 'bg-slate-100 text-slate-600';
-    if (status === 'NO_SHOW') return 'bg-error-container text-on-error-container';
-    return 'bg-primary-container text-primary-fixed-variant';
+    return `glass-panel ${QUEUE_STATUS_UI[status].className}`;
   }
 
   initials(name: string): string {

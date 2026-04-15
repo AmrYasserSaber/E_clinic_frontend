@@ -8,7 +8,7 @@ import { QueueItemComponent } from './queue-item.component';
   imports: [QueueItemComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="space-y-4">
+    <div class="flex flex-col gap-4">
       @for (patient of items; track trackByItem($index, patient)) {
         <app-queue-item
           [item]="patient"
@@ -22,8 +22,8 @@ import { QueueItemComponent } from './queue-item.component';
 })
 export class QueueListComponent {
   @Input({ required: true }) items: QueueItem[] = [];
-  @Output() checkIn = new EventEmitter<number>();
-  @Output() noShow = new EventEmitter<number>();
+  @Output('checkin') checkIn = new EventEmitter<number>();
+  @Output('noshow') noShow = new EventEmitter<number>();
 
   trackByItem = (_: number, item: QueueItem) => item.id;
 
@@ -40,7 +40,8 @@ export class QueueListComponent {
     const [h, m] = item.appointment_time.split(':').map((x) => Number(x));
     const appt = new Date(now);
     appt.setHours(h || 0, m || 0, 0, 0);
-    const diff = Math.max(0, Math.floor((now.getTime() - appt.getTime()) / 60000));
-    return `ETA +${diff}m`;
+    const diffMinutes = Math.floor((appt.getTime() - now.getTime()) / 60000);
+    if (diffMinutes > 0) return `ETA ${diffMinutes}m`;
+    return `Late ${Math.abs(diffMinutes)}m`;
   }
 }

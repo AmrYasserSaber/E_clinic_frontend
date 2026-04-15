@@ -9,7 +9,7 @@ import { SettingsPage } from './features/system/settings.page';
 export const routes: Routes = [
   {
     path: 'auth',
-    loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES)
+    loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
   {
     path: '',
@@ -20,33 +20,34 @@ export const routes: Routes = [
         path: 'patient',
         canActivate: [authGuard],
         data: { roles: ['patient'] },
-        loadChildren: () => import('./features/patient/patient.routes').then((m) => m.PATIENT_ROUTES)
+        loadChildren: () =>
+          import('./features/patient/patient.routes').then((m) => m.PATIENT_ROUTES),
       },
       {
         path: 'doctor',
         canActivate: [authGuard],
         data: { roles: ['doctor'] },
-        loadChildren: () => import('./features/doctor/doctor.routes').then((m) => m.DOCTOR_ROUTES)
+        loadChildren: () => import('./features/doctor/doctor.routes').then((m) => m.DOCTOR_ROUTES),
       },
       {
         path: 'receptionist',
         canActivate: [authGuard],
         data: { roles: ['receptionist'] },
         loadChildren: () =>
-          import('./features/receptionist/receptionist.routes').then((m) => m.RECEPTIONIST_ROUTES)
+          import('./features/receptionist/receptionist.routes').then((m) => m.RECEPTIONIST_ROUTES),
       },
       {
         path: 'admin',
         canActivate: [authGuard],
         data: { roles: ['admin'] },
-        loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES)
+        loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
       },
       { path: 'settings', component: SettingsPage },
       { path: 'account/change-password', component: ChangePasswordPage },
       { path: 'forbidden', component: ForbiddenPage },
-      { path: '', pathMatch: 'full', redirectTo: 'patient/dashboard' }
-    ]
+      { path: '', pathMatch: 'full', redirectTo: 'patient/dashboard' },
+    ],
   },
   { path: 'forbidden', component: ForbiddenPage },
-  { path: '**', component: NotFoundPage }
+  { path: '**', component: NotFoundPage },
 ];

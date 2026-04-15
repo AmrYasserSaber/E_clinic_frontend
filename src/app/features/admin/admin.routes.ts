@@ -13,5 +13,5 @@ export const ADMIN_ROUTES: Routes = [
   { path: 'export', component: AdminExportPage },
   { path: 'patients', component: AdminPatientsPage },
   { path: 'patients/:id', component: AdminPatientDetailsPage },
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' }
+  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
 ];

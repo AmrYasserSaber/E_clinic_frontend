@@ -1,10 +1,5 @@
 import { Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
@@ -23,7 +18,7 @@ import { AuthService } from '../../services/auth.service';
         <div class="relative z-10 w-full max-w-md">
           <div class="mb-8 text-center">
             <div
-              class="bg-surface-container-lowest neumorphic-card mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl"
+              class="card-surface mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl"
             >
               <span class="material-symbols-outlined text-primary text-2xl">passkey</span>
             </div>
@@ -36,9 +31,7 @@ import { AuthService } from '../../services/auth.service';
           </div>
 
           @if (success()) {
-            <div
-              class="bg-surface-container-lowest neumorphic-card rounded-3xl p-6 text-center md:p-8"
-            >
+            <div class="card-surface rounded-3xl p-6 text-center md:p-8">
               <div
                 class="bg-primary/10 mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full"
               >
@@ -59,7 +52,7 @@ import { AuthService } from '../../services/auth.service';
           } @else {
             @if (errorBanner()) {
               <div
-                class="border-error/25 bg-error/8 mb-4 flex gap-3 rounded-2xl border px-4 py-3"
+                class="ghost-outline bg-error/8 mb-4 flex gap-3 rounded-2xl px-4 py-3"
                 role="alert"
               >
                 <span
@@ -70,13 +63,10 @@ import { AuthService } from '../../services/auth.service';
                 <p class="text-on-surface text-sm font-medium">{{ errorBanner() }}</p>
               </div>
             }
-            <div class="bg-surface-container-lowest neumorphic-card rounded-3xl p-6 md:p-8">
+            <div class="card-surface rounded-3xl p-6 md:p-8">
               <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-5">
                 <div class="space-y-2">
-                  <label
-                    class="text-secondary ml-1 block text-sm font-semibold"
-                    for="otp-email"
-                  >
+                  <label class="text-secondary ml-1 block text-sm font-semibold" for="otp-email">
                     Email Address
                   </label>
                   <div class="relative">
@@ -93,7 +83,7 @@ import { AuthService } from '../../services/auth.service';
                       placeholder="name@example.com"
                       [attr.aria-invalid]="fieldInvalid('email')"
                       [attr.aria-describedby]="fieldError('email') ? 'otp-email-err' : null"
-                      class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-4 pl-11 transition-all focus:ring-2"
+                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                   @if (fieldError('email'); as err) {
@@ -120,7 +110,7 @@ import { AuthService } from '../../services/auth.service';
                       placeholder="000000"
                       [attr.aria-invalid]="fieldInvalid('otp')"
                       [attr.aria-describedby]="fieldError('otp') ? 'otp-code-err' : null"
-                      class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-4 pl-11 font-mono tracking-[0.3em] transition-all focus:ring-2"
+                      class="input-ui pl-11 pr-4 py-3 font-mono tracking-[0.3em] placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                   @if (fieldError('otp'); as err) {
@@ -147,8 +137,10 @@ import { AuthService } from '../../services/auth.service';
                       autocomplete="new-password"
                       placeholder="At least 8 characters"
                       [attr.aria-invalid]="fieldInvalid('new_password')"
-                      [attr.aria-describedby]="fieldError('new_password') ? 'otp-pw-err' : 'otp-pw-hint'"
-                      class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-11 pl-11 transition-all focus:ring-2"
+                      [attr.aria-describedby]="
+                        fieldError('new_password') ? 'otp-pw-err' : 'otp-pw-hint'
+                      "
+                      class="input-ui pl-11 pr-11 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                     <button
                       type="button"
@@ -188,8 +180,10 @@ import { AuthService } from '../../services/auth.service';
                       autocomplete="new-password"
                       placeholder="Repeat password"
                       [attr.aria-invalid]="fieldInvalid('confirm_password')"
-                      [attr.aria-describedby]="fieldError('confirm_password') ? 'otp-confirm-err' : null"
-                      class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-11 pl-11 transition-all focus:ring-2"
+                      [attr.aria-describedby]="
+                        fieldError('confirm_password') ? 'otp-confirm-err' : null
+                      "
+                      class="input-ui pl-11 pr-11 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                     <button
                       type="button"
@@ -203,7 +197,9 @@ import { AuthService } from '../../services/auth.service';
                     </button>
                   </div>
                   @if (fieldError('confirm_password'); as err) {
-                    <p id="otp-confirm-err" class="text-error ml-1 text-xs font-medium">{{ err }}</p>
+                    <p id="otp-confirm-err" class="text-error ml-1 text-xs font-medium">
+                      {{ err }}
+                    </p>
                   }
                 </div>
 
@@ -221,7 +217,10 @@ import { AuthService } from '../../services/auth.service';
                   }
                 </button>
               </form>
-              <div class="border-outline-variant/10 mt-8 border-t pt-6 text-center">
+              <div class="mt-8 text-center">
+                <div
+                  class="mb-5 h-px bg-linear-to-r from-transparent via-outline-variant/20 to-transparent"
+                ></div>
                 <p class="text-on-surface-variant text-sm font-medium">
                   Already set your password?
                   <a
@@ -339,7 +338,10 @@ export class SetPasswordOtpPage {
         },
         error: (err: unknown) => {
           this.loading.set(false);
-          const parsed = AuthService.parseDrfErrors(err, 'Unable to set password. Please try again.');
+          const parsed = AuthService.parseDrfErrors(
+            err,
+            'Unable to set password. Please try again.',
+          );
           this.serverFieldErrors.set(parsed.fieldErrors);
           this.errorBanner.set(parsed.message);
         },
@@ -350,7 +352,9 @@ export class SetPasswordOtpPage {
     for (const key of Object.keys(this.form.controls)) {
       const ctrl = this.form.get(key);
       if (ctrl?.invalid) {
-        const el = document.getElementById(`otp-${key === 'new_password' ? 'new-password' : key === 'confirm_password' ? 'confirm-password' : key}`);
+        const el = document.getElementById(
+          `otp-${key === 'new_password' ? 'new-password' : key === 'confirm_password' ? 'confirm-password' : key}`,
+        );
         el?.focus();
         break;
       }

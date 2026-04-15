@@ -10,24 +10,22 @@ import { AppointmentsService } from '../../services/appointments.service';
   imports: [RouterLink],
   template: `
     <div class="mb-8 pt-2">
-      <h2 class="font-headline text-3xl font-extrabold tracking-tight text-slate-900">
+      <h2 class="font-headline text-3xl font-extrabold tracking-tight text-(--color-on-surface)">
         Consultations History
       </h2>
-      <p class="mt-2 text-sm font-medium text-slate-500">
+      <p class="mt-2 text-sm font-medium text-on-surface-variant">
         Review diagnoses, notes, requested tests, and prescriptions from your completed visits.
       </p>
     </div>
 
     @if (isLoading) {
-      <div
-        class="rounded-2xl bg-white p-6 text-center text-sm text-slate-500 shadow-[0_10px_25px_-5px_rgba(0,100,121,0.08)]"
-      >
+      <div class="card-surface p-6 text-center text-sm text-on-surface-variant">
         Loading consultations...
       </div>
     } @else if (!consultations.length) {
-      <div class="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center">
-        <p class="font-bold text-slate-900">No consultations yet</p>
-        <p class="mt-1 text-sm text-slate-500">
+      <div class="card-surface bg-surface-container-low p-8 text-center">
+        <p class="font-bold text-(--color-on-surface)">No consultations yet</p>
+        <p class="mt-1 text-sm text-on-surface-variant">
           Consultation details will appear after doctor completes your visit.
         </p>
         <a routerLink="/patient/appointments" class="btn-primary mt-4 inline-block no-underline"
@@ -37,13 +35,13 @@ import { AppointmentsService } from '../../services/appointments.service';
     } @else {
       <div class="space-y-5 pb-10">
         @for (appt of consultations; track appt.id) {
-          <article class="rounded-2xl bg-white p-6 shadow-[0_10px_25px_-5px_rgba(0,100,121,0.08)]">
+          <article class="card-surface rounded-3xl p-6">
             <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h3 class="font-headline text-lg font-bold text-slate-900">
+                <h3 class="font-headline text-lg font-bold text-(--color-on-surface)">
                   {{ appt.doctor.fullName }}
                 </h3>
-                <p class="text-xs text-slate-500">
+                <p class="text-xs text-on-surface-variant">
                   {{ formatDisplayDate(appt.date) }} at {{ formatDisplayTime(appt.time) }} ·
                   Appointment #{{ appt.id }}
                 </p>
@@ -52,7 +50,7 @@ import { AppointmentsService } from '../../services/appointments.service';
               <div class="flex items-center gap-2">
                 <a
                   routerLink="/patient/appointments"
-                  class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 no-underline"
+                  class="glass-panel rounded-full px-3 py-1 text-xs font-semibold text-(--color-on-surface) no-underline"
                 >
                   Completed
                 </a>
@@ -64,32 +62,40 @@ import { AppointmentsService } from '../../services/appointments.service';
 
             @if (expandedConsultationId === appt.id) {
               <div class="space-y-4">
-                <section class="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                  <p class="mb-1 text-xs font-bold uppercase tracking-wider text-slate-500">
+                <section class="rounded-3xl bg-surface-container-low p-4">
+                  <p
+                    class="mb-1 text-xs font-bold uppercase tracking-wider text-on-surface-variant"
+                  >
                     Diagnosis
                   </p>
-                  <p class="text-sm text-slate-800">
+                  <p class="text-sm font-medium text-(--color-on-surface)">
                     {{ appt.consultationSummary?.diagnosis || 'No diagnosis recorded.' }}
                   </p>
                 </section>
 
                 @if (appt.consultationSummary?.notes?.trim()) {
-                  <section class="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                    <p class="mb-1 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <section class="rounded-3xl bg-surface-container-low p-4">
+                    <p
+                      class="mb-1 text-xs font-bold uppercase tracking-wider text-on-surface-variant"
+                    >
                       Doctor Notes
                     </p>
-                    <p class="whitespace-pre-wrap text-sm text-slate-800">
+                    <p class="whitespace-pre-wrap text-sm font-medium text-(--color-on-surface)">
                       {{ appt.consultationSummary?.notes }}
                     </p>
                   </section>
                 }
 
                 @if ((appt.consultationSummary?.requestedTests?.length ?? 0) > 0) {
-                  <section class="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                    <p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <section class="rounded-3xl bg-surface-container-low p-4">
+                    <p
+                      class="mb-2 text-xs font-bold uppercase tracking-wider text-on-surface-variant"
+                    >
                       Requested Tests
                     </p>
-                    <ul class="list-disc space-y-1 pl-5 text-sm text-slate-800">
+                    <ul
+                      class="list-disc space-y-1 pl-5 text-sm font-medium text-(--color-on-surface)"
+                    >
                       @for (test of appt.consultationSummary!.requestedTests; track test) {
                         <li>{{ test }}</li>
                       }
@@ -98,19 +104,23 @@ import { AppointmentsService } from '../../services/appointments.service';
                 }
 
                 @if ((appt.consultationSummary?.prescriptionItems?.length ?? 0) > 0) {
-                  <section class="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                    <p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <section class="rounded-3xl bg-surface-container-low p-4">
+                    <p
+                      class="mb-2 text-xs font-bold uppercase tracking-wider text-on-surface-variant"
+                    >
                       Prescriptions
                     </p>
                     <div class="space-y-2">
                       @for (item of appt.consultationSummary!.prescriptionItems; track item.id) {
-                        <article class="rounded-lg border border-slate-100 bg-white p-3">
-                          <p class="text-sm font-semibold text-slate-900">{{ item.drug }}</p>
-                          <p class="text-xs text-slate-600">
+                        <article class="card-surface rounded-2xl p-3">
+                          <p class="text-sm font-semibold text-(--color-on-surface)">
+                            {{ item.drug }}
+                          </p>
+                          <p class="text-xs font-medium text-on-surface-variant">
                             Dose: {{ item.dose }} · Duration: {{ item.duration }}
                           </p>
                           @if (item.instructions?.trim()) {
-                            <p class="mt-1 text-xs text-slate-600">
+                            <p class="mt-1 text-xs font-medium text-on-surface-variant">
                               Instructions: {{ item.instructions }}
                             </p>
                           }

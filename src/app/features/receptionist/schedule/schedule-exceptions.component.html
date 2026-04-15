@@ -1,3 +1,5 @@
+<!-- htmlhint doctype-first:false -->
+<!-- htmlhint attr-lowercase:false -->
 <main class="pt-24 px-6 w-full space-y-8 bg-surface font-body text-on-surface min-h-screen pb-24">
   @if (vm$ | async; as vm) {
     <section class="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -14,7 +16,7 @@
         >
         <select
           title="Select practitioner"
-          class="w-full h-14 bg-surface-container-low neumorphic-inset border-none rounded-2xl px-5 font-semibold"
+          class="input-ui h-14 font-semibold"
           [value]="vm.selectedDoctor || ''"
           (change)="onDoctorChange($any($event.target).value)"
         >
@@ -26,17 +28,14 @@
     </section>
 
     @if (vm.error) {
-      <div class="rounded-xl p-4 bg-error-container text-on-error-container">{{ vm.error }}</div>
+      <div class="ghost-outline rounded-2xl p-4 bg-error/8 text-error">{{ vm.error }}</div>
     }
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <div class="lg:col-span-7 bg-surface-container-lowest neumorphic-card rounded-4xl p-6">
+      <div class="lg:col-span-7 card-surface rounded-4xl p-6">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-headline font-bold">Monthly Calendar</h3>
-          <button
-            class="px-4 py-2 rounded-xl bg-primary text-white font-semibold"
-            (click)="openModal()"
-          >
+          <button class="btn-primary px-4 py-2 rounded-2xl" (click)="openModal()">
             Add Exception
           </button>
         </div>
@@ -50,7 +49,7 @@
         </div>
       </div>
 
-      <div class="lg:col-span-5 bg-surface-container-lowest neumorphic-card rounded-4xl p-6">
+      <div class="lg:col-span-5 card-surface rounded-4xl p-6">
         <h3 class="text-lg font-headline font-bold mb-4">Exceptions List</h3>
 
         @if (vm.loading) {
@@ -82,7 +81,7 @@
                   </div>
                 </div>
                 <button
-                  class="p-2 rounded-lg text-error hover:bg-error-container/20"
+                  class="p-2 rounded-2xl text-error hover:bg-error/10"
                   (click)="deleteException(e.id)"
                 >
                   <span class="material-symbols-outlined">delete</span>
@@ -96,18 +95,11 @@
 
     @if (vm.showModal) {
       <div class="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4">
-        <div
-          class="w-full max-w-lg bg-surface-container-lowest rounded-2xl p-6 neumorphic-card"
-          [formGroup]="exceptionForm"
-        >
+        <div class="card-surface w-full max-w-lg rounded-3xl p-6" [formGroup]="exceptionForm">
           <h4 class="text-xl font-headline font-bold mb-4">Add Exception</h4>
 
           <div class="space-y-4">
-            <select
-              title="Exception type"
-              class="w-full h-11 rounded-xl neumorphic-inset border-none px-3"
-              formControlName="exception_type"
-            >
+            <select title="Exception type" class="input-ui h-11" formControlName="exception_type">
               <option value="DAY_OFF">Day Off</option>
               <option value="CUSTOM_WORKING_DAY">One-Off Working Day</option>
             </select>
@@ -115,13 +107,13 @@
             <div class="grid grid-cols-2 gap-3">
               <input
                 title="Start date"
-                class="h-11 rounded-xl neumorphic-inset border-none px-3"
+                class="input-ui h-11"
                 type="date"
                 formControlName="start_date"
               />
               <input
                 title="End date"
-                class="h-11 rounded-xl neumorphic-inset border-none px-3"
+                class="input-ui h-11"
                 type="date"
                 formControlName="end_date"
               />
@@ -131,13 +123,13 @@
               <div class="grid grid-cols-2 gap-3">
                 <input
                   title="Custom start time"
-                  class="h-11 rounded-xl neumorphic-inset border-none px-3"
+                  class="input-ui h-11"
                   type="time"
                   formControlName="custom_start_time"
                 />
                 <input
                   title="Custom end time"
-                  class="h-11 rounded-xl neumorphic-inset border-none px-3"
+                  class="input-ui h-11"
                   type="time"
                   formControlName="custom_end_time"
                 />
@@ -145,7 +137,7 @@
             }
 
             <textarea
-              class="w-full rounded-xl neumorphic-inset border-none px-3 py-2"
+              class="input-ui w-full px-3 py-2"
               rows="3"
               placeholder="Reason"
               formControlName="reason"
@@ -153,12 +145,8 @@
           </div>
 
           <div class="mt-6 flex justify-end gap-3">
-            <button class="px-4 py-2 rounded-xl border" (click)="closeModal()">Cancel</button>
-            <button
-              class="px-4 py-2 rounded-xl bg-primary text-white"
-              [disabled]="vm.saving"
-              (click)="saveException()"
-            >
+            <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+            <button class="btn-primary" [disabled]="vm.saving" (click)="saveException()">
               {{ vm.saving ? 'Saving...' : 'Save' }}
             </button>
           </div>

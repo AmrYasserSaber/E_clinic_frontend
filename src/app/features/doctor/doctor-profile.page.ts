@@ -11,10 +11,14 @@ import { AuthService } from '../../services/auth.service';
     <div class="mx-auto max-w-2xl space-y-6 pb-8 pt-2">
       <div class="flex items-center justify-between gap-3">
         <div>
-          <h1 class="font-headline text-2xl font-extrabold tracking-tight text-slate-900">
+          <h1
+            class="font-headline text-2xl font-extrabold tracking-tight text-(--color-on-surface)"
+          >
             Doctor Profile
           </h1>
-          <p class="text-sm text-slate-500">Your account details and contact information.</p>
+          <p class="text-sm font-medium text-on-surface-variant">
+            Your account details and contact information.
+          </p>
         </div>
         <a routerLink="/account/change-password" class="btn-secondary no-underline"
           >Change password</a
@@ -22,46 +26,62 @@ import { AuthService } from '../../services/auth.service';
       </div>
 
       @if (loading()) {
-        <div class="card-surface p-6 text-sm text-slate-500">Loading profile...</div>
+        <div class="card-surface p-6 text-sm text-on-surface-variant">Loading profile...</div>
       } @else if (error()) {
-        <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+        <div class="ghost-outline bg-error/8 rounded-2xl p-4 text-sm font-medium text-error">
           {{ error() }}
         </div>
       } @else if (profile()) {
         <section class="card-surface p-6">
           <div class="mb-5 flex items-center gap-4">
             <div
-              class="grid h-14 w-14 place-items-center rounded-full bg-cyan-100 text-xl font-bold text-cyan-700"
+              class="glass-panel grid h-14 w-14 place-items-center rounded-full text-xl font-bold text-(--color-primary)"
             >
               {{ initials(profile()!) }}
             </div>
             <div>
-              <h2 class="text-lg font-semibold text-slate-900">{{ fullName(profile()!) }}</h2>
-              <p class="text-sm text-slate-500">Doctor</p>
+              <h2 class="text-lg font-semibold text-(--color-on-surface)">
+                {{ fullName(profile()!) }}
+              </h2>
+              <p class="text-sm font-medium text-on-surface-variant">Doctor</p>
             </div>
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <article class="rounded-xl border border-slate-100 bg-white p-4">
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Email</p>
-              <p class="mt-1 text-sm text-slate-900">{{ profile()!.email }}</p>
+            <article class="rounded-3xl bg-surface-container-low p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+                Email
+              </p>
+              <p class="mt-1 text-sm font-semibold text-(--color-on-surface)">
+                {{ profile()!.email }}
+              </p>
             </article>
 
-            <article class="rounded-xl border border-slate-100 bg-white p-4">
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Phone</p>
-              <p class="mt-1 text-sm text-slate-900">{{ profile()!.phone_number || 'N/A' }}</p>
+            <article class="rounded-3xl bg-surface-container-low p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+                Phone
+              </p>
+              <p class="mt-1 text-sm font-semibold text-(--color-on-surface)">
+                {{ profile()!.phone_number || 'N/A' }}
+              </p>
             </article>
 
-            <article class="rounded-xl border border-slate-100 bg-white p-4">
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <article class="rounded-3xl bg-surface-container-low p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
                 Date of Birth
               </p>
-              <p class="mt-1 text-sm text-slate-900">{{ profile()!.date_of_birth || 'N/A' }}</p>
+              <p class="mt-1 text-sm font-semibold text-(--color-on-surface)">
+                {{ profile()!.date_of_birth || 'N/A' }}
+              </p>
             </article>
 
-            <article class="rounded-xl border border-slate-100 bg-white p-4">
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Groups</p>
-              <p class="mt-1 text-sm text-slate-900">{{ profile()!.groups.join(', ') || 'N/A' }}</p>
+            <article class="rounded-3xl bg-surface-container-low p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+                Groups
+              </p>
+              <p class="mt-1 text-sm font-semibold text-(--color-on-surface)">
+                {{ profile()!.groups.join(', ') || 'N/A' }}
+              </p>
             </article>
           </div>
         </section>

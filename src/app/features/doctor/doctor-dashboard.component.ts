@@ -1,7 +1,8 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { catchError, finalize, interval, of, startWith, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { AppointmentStatus } from '../../models/domain.models';
 import {
   DoctorAppointment,
@@ -19,6 +20,7 @@ import { ConsultationModalComponent } from './consultation-modal.component';
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     PageHeaderComponent,
     StatusBadgeComponent,
     EmptyStateComponent,
@@ -30,26 +32,100 @@ import { ConsultationModalComponent } from './consultation-modal.component';
       subtitle="Live queue updates every 30 seconds with upcoming appointments."
     />
 
+    <section class="card-surface mb-6 p-5">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="min-w-0">
+          <h2 class="text-base font-semibold text-(--color-on-surface)">Today at a glance</h2>
+          <p class="mt-1 text-xs text-on-surface-variant">
+            Queue date:
+            <span class="font-semibold text-(--color-on-surface)">{{ queueDate() }}</span>
+            · Upcoming window:
+            <span class="font-semibold text-(--color-on-surface)">
+              {{ todayIso }} → {{ datePlusSevenIso }}
+            </span>
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <a class="btn-secondary" routerLink="/doctor/queue">Open Queue</a>
+          <a class="btn-secondary" routerLink="/doctor/schedule">Schedule</a>
+          <a class="btn-secondary" routerLink="/doctor/consultations">Consultations</a>
+          <button
+            class="btn-primary"
+            type="button"
+            [disabled]="loadingQueue()"
+            (click)="refreshQueue()"
+          >
+            Refresh now
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-3xl bg-surface-container-low p-4">
+          <p class="text-xs font-semibold text-on-surface-variant">Checked-in</p>
+          <p class="mt-2 text-2xl font-bold text-(--color-on-surface)">{{ checkedInCount() }}</p>
+          <p class="mt-1 text-xs text-on-surface-variant">Patients waiting now</p>
+        </div>
+        <div class="rounded-3xl bg-surface-container-low p-4">
+          <p class="text-xs font-semibold text-on-surface-variant">Confirmed</p>
+          <p class="mt-2 text-2xl font-bold text-(--color-on-surface)">{{ confirmedCount() }}</p>
+          <p class="mt-1 text-xs text-on-surface-variant">Arriving later today</p>
+        </div>
+        <div class="rounded-3xl bg-surface-container-low p-4">
+          <p class="text-xs font-semibold text-on-surface-variant">Upcoming</p>
+          <p class="mt-2 text-2xl font-bold text-(--color-on-surface)">{{ upcomingCount() }}</p>
+          <p class="mt-1 text-xs text-on-surface-variant">Next 7 days</p>
+        </div>
+        <div class="rounded-3xl bg-surface-container-low p-4">
+          <p class="text-xs font-semibold text-on-surface-variant">Next patient</p>
+          <p class="mt-2 truncate text-sm font-semibold text-(--color-on-surface)">
+            {{ nextPatientLabel() }}
+          </p>
+          <p class="mt-1 text-xs text-on-surface-variant">
+            {{ nextPatientMeta() }}
+          </p>
+        </div>
+      </div>
+    </section>
+
     <div class="grid gap-6 lg:grid-cols-3">
       <section class="lg:col-span-2 card-surface p-5">
-        <div class="mb-4 flex items-center justify-between">
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 class="text-lg font-semibold text-slate-900">Today's Queue</h2>
-            <p class="text-xs text-slate-500">Date: {{ queueDate() }}</p>
+            <h2 class="text-lg font-semibold text-(--color-on-surface)">Today's Queue</h2>
+            <p class="text-xs text-on-surface-variant">
+              Ordered by check-in then appointment time.
+            </p>
           </div>
-          <span class="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
+          <span
+            class="glass-panel rounded-full px-3 py-1 text-xs font-semibold text-(--color-primary)"
+          >
             Auto-refresh 30s
           </span>
         </div>
 
         @if (queueError()) {
-          <p class="mb-3 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          <p
+            class="ghost-outline mb-3 rounded-2xl bg-error/8 px-3 py-2 text-sm font-medium text-error"
+          >
             {{ queueError() }}
           </p>
         }
 
         @if (loadingQueue()) {
-          <p class="text-sm text-slate-500">Loading queue...</p>
+          <div class="space-y-3">
+            @for (s of skeletonRows; track s) {
+              <div class="rounded-3xl bg-surface-container-low p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="min-w-0 flex-1">
+                    <div class="h-4 w-40 rounded bg-black/10"></div>
+                    <div class="mt-2 h-3 w-64 rounded bg-black/8"></div>
+                  </div>
+                  <div class="h-7 w-24 rounded-full bg-black/10"></div>
+                </div>
+              </div>
+            }
+          </div>
         } @else if (queue().length === 0) {
           <app-empty-state
             title="Queue is currently empty"
@@ -58,22 +134,52 @@ import { ConsultationModalComponent } from './consultation-modal.component';
         } @else {
           <div class="space-y-3">
             @for (item of queue(); track item.id; let i = $index) {
-              <article class="rounded-xl border border-slate-100 bg-white p-4 shadow-soft">
-                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div class="space-y-1">
-                    <p class="font-semibold text-slate-900">{{ item.patient_full_name }}</p>
-                    <p class="text-xs text-slate-500">
-                      Queue #{{ i + 1 }} · Check-in: {{ formatCheckInTime(item.check_in_time) }} ·
-                      Waiting: {{ waitingLabel(item.waiting_time_minutes) }}
-                    </p>
+              <article
+                class="rounded-3xl p-4"
+                [class.bg-surface-container-low]="item.status !== 'CHECKED_IN'"
+                [class.bg-(--color-primary)]="item.status === 'CHECKED_IN'"
+                [class.text-white]="item.status === 'CHECKED_IN'"
+              >
+                <div class="flex flex-col gap-3">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span
+                          class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                          [class.bg-black/5]="item.status !== 'CHECKED_IN'"
+                          [class.text-(--color-on-surface-variant)]="item.status !== 'CHECKED_IN'"
+                          [class.bg-white/10]="item.status === 'CHECKED_IN'"
+                          [class.text-white]="item.status === 'CHECKED_IN'"
+                        >
+                          Queue #{{ i + 1 }}
+                        </span>
+                        <app-status-badge
+                          [status]="item.status"
+                          [isInverted]="item.status === 'CHECKED_IN'"
+                        />
+                      </div>
+                      <p
+                        class="mt-2 truncate text-base font-semibold"
+                        [class.text-white]="item.status === 'CHECKED_IN'"
+                        [class.text-(--color-on-surface)]="item.status !== 'CHECKED_IN'"
+                      >
+                        {{ item.patient_full_name }}
+                      </p>
+                      <p
+                        class="text-xs"
+                        [class.text-white/85]="item.status === 'CHECKED_IN'"
+                        [class.text-on-surface-variant]="item.status !== 'CHECKED_IN'"
+                      >
+                        Check-in: {{ formatCheckInTime(item.check_in_time) }} · Waiting:
+                        {{ waitingLabel(item.waiting_time_minutes) }}
+                      </p>
+                    </div>
                   </div>
 
-                  <div class="flex flex-wrap items-center gap-2">
-                    <app-status-badge [status]="item.status" />
-
+                  <div class="flex flex-wrap items-center justify-end gap-2">
                     @if (item.status === 'REQUESTED') {
                       <button
-                        class="btn-secondary"
+                        class="btn-primary"
                         type="button"
                         [disabled]="isActionBusy(item.id)"
                         (click)="confirm(item)"
@@ -81,7 +187,7 @@ import { ConsultationModalComponent } from './consultation-modal.component';
                         Confirm
                       </button>
                       <button
-                        class="btn-secondary"
+                        class="btn-secondary bg-error/8! text-error! hover:bg-error/12!"
                         type="button"
                         [disabled]="isActionBusy(item.id)"
                         (click)="openDeclineDialog(item)"
@@ -92,7 +198,7 @@ import { ConsultationModalComponent } from './consultation-modal.component';
 
                     @if (item.status === 'CHECKED_IN') {
                       <button
-                        class="btn-primary"
+                        class="btn-secondary bg-white! text-(--color-primary)!"
                         type="button"
                         [disabled]="isActionBusy(item.id)"
                         (click)="openConsultationModal(item)"
@@ -100,7 +206,7 @@ import { ConsultationModalComponent } from './consultation-modal.component';
                         Complete Consultation
                       </button>
                       <button
-                        class="btn-secondary"
+                        class="btn-secondary bg-white/10! text-white! hover:bg-white/15!"
                         type="button"
                         [disabled]="isActionBusy(item.id)"
                         (click)="openNoShowDialog(item)"
@@ -118,18 +224,34 @@ import { ConsultationModalComponent } from './consultation-modal.component';
 
       <section class="card-surface p-5">
         <div class="mb-4">
-          <h2 class="text-lg font-semibold text-slate-900">Upcoming 7 Days</h2>
-          <p class="text-xs text-slate-500">From {{ todayIso }} to {{ datePlusSevenIso }}</p>
+          <h2 class="text-lg font-semibold text-(--color-on-surface)">Upcoming 7 Days</h2>
+          <p class="text-xs text-on-surface-variant">
+            From {{ todayIso }} to {{ datePlusSevenIso }}
+          </p>
         </div>
 
         @if (upcomingError()) {
-          <p class="mb-3 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          <p
+            class="ghost-outline mb-3 rounded-2xl bg-error/8 px-3 py-2 text-sm font-medium text-error"
+          >
             {{ upcomingError() }}
           </p>
         }
 
         @if (loadingUpcoming()) {
-          <p class="text-sm text-slate-500">Loading appointments...</p>
+          <div class="space-y-3">
+            @for (s of skeletonRows; track s) {
+              <div class="rounded-3xl bg-surface-container-low p-3">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0 flex-1">
+                    <div class="h-4 w-44 rounded bg-black/10"></div>
+                    <div class="mt-2 h-3 w-36 rounded bg-black/8"></div>
+                  </div>
+                  <div class="h-7 w-24 rounded-full bg-black/10"></div>
+                </div>
+              </div>
+            }
+          </div>
         } @else if (upcoming().length === 0) {
           <app-empty-state
             title="No upcoming appointments"
@@ -138,11 +260,13 @@ import { ConsultationModalComponent } from './consultation-modal.component';
         } @else {
           <div class="space-y-3">
             @for (appt of upcoming(); track appt.id) {
-              <article class="rounded-xl border border-slate-100 bg-white p-3">
+              <article class="rounded-3xl bg-surface-container-low p-3">
                 <div class="flex items-start justify-between gap-2">
                   <div>
-                    <p class="text-sm font-semibold text-slate-900">{{ patientName(appt) }}</p>
-                    <p class="text-xs text-slate-500">
+                    <p class="text-sm font-semibold text-(--color-on-surface)">
+                      {{ patientName(appt) }}
+                    </p>
+                    <p class="text-xs text-on-surface-variant">
                       {{ appt.appointment_date }} at {{ appt.appointment_time }}
                     </p>
                   </div>
@@ -158,8 +282,8 @@ import { ConsultationModalComponent } from './consultation-modal.component';
     @if (declineTarget()) {
       <div class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/40 p-4">
         <div class="card-surface w-full max-w-md p-5">
-          <h3 class="text-base font-semibold text-slate-900">Decline Appointment</h3>
-          <p class="mt-1 text-sm text-slate-600">Reason is optional.</p>
+          <h3 class="text-base font-semibold text-(--color-on-surface)">Decline Appointment</h3>
+          <p class="mt-1 text-sm text-on-surface-variant">Reason is optional.</p>
 
           <textarea
             class="input-ui mt-3 min-h-24"
@@ -187,8 +311,8 @@ import { ConsultationModalComponent } from './consultation-modal.component';
     @if (noShowTarget()) {
       <div class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/40 p-4">
         <div class="card-surface w-full max-w-md p-5">
-          <h3 class="text-base font-semibold text-slate-900">Mark No-Show</h3>
-          <p class="mt-1 text-sm text-slate-600">
+          <h3 class="text-base font-semibold text-(--color-on-surface)">Mark No-Show</h3>
+          <p class="mt-1 text-sm text-on-surface-variant">
             Are you sure you want to mark {{ noShowTarget()!.patient_full_name }} as no-show?
           </p>
 
@@ -241,10 +365,56 @@ export class DoctorDashboardComponent {
 
   protected readonly todayIso = this.toDateOnly(new Date());
   protected readonly datePlusSevenIso = this.toDateOnly(this.addDays(new Date(), 7));
+  protected readonly skeletonRows = [0, 1, 2] as const;
+
+  protected readonly checkedInCount = computed(
+    () => this.queue().filter((r) => r.status === 'CHECKED_IN').length,
+  );
+  protected readonly confirmedCount = computed(
+    () => this.queue().filter((r) => r.status === 'CONFIRMED').length,
+  );
+  protected readonly upcomingCount = computed(() => this.upcoming().length);
+  protected readonly nextPatientLabel = computed(() => {
+    const firstCheckedIn = this.queue().find((r) => r.status === 'CHECKED_IN');
+    if (firstCheckedIn) return firstCheckedIn.patient_full_name;
+    const firstConfirmed = this.queue().find((r) => r.status === 'CONFIRMED');
+    if (firstConfirmed) return firstConfirmed.patient_full_name;
+    return 'No one in queue';
+  });
+  protected readonly nextPatientMeta = computed(() => {
+    const firstCheckedIn = this.queue().find((r) => r.status === 'CHECKED_IN');
+    if (firstCheckedIn) return `Waiting: ${this.waitingLabel(firstCheckedIn.waiting_time_minutes)}`;
+    const firstConfirmed = this.queue().find((r) => r.status === 'CONFIRMED');
+    if (firstConfirmed) return `Time: ${firstConfirmed.appointment_time || 'N/A'}`;
+    return 'You are all caught up.';
+  });
 
   constructor() {
     this.startQueuePolling();
     this.loadUpcomingAppointments();
+  }
+
+  protected refreshQueue(): void {
+    if (this.loadingQueue()) {
+      return;
+    }
+    this.loadingQueue.set(true);
+    this.queueError.set('');
+    this.doctorService
+      .getQueue()
+      .pipe(
+        finalize(() => this.loadingQueue.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (response) => {
+          this.queueDate.set(response.date || this.todayIso);
+          this.queue.set(response.items || []);
+        },
+        error: (err: unknown) => {
+          this.queueError.set(this.extractErrorMessage(err));
+        },
+      });
   }
 
   protected confirm(item: DoctorQueueItem): void {

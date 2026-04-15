@@ -45,7 +45,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
         <div class="relative z-10 w-full max-w-xl">
           <div class="mb-5 text-center">
             <div
-              class="bg-surface-container-lowest neumorphic-card mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl"
+              class="card-surface mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl"
             >
               <span class="material-symbols-outlined text-primary text-2xl">person_add</span>
             </div>
@@ -58,7 +58,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
               Create your MediFlow account. Staff roles need admin approval before you can sign in.
             </p>
           </div>
-          <div class="bg-surface-container-lowest neumorphic-card rounded-3xl p-6 md:p-8">
+          <div class="card-surface rounded-3xl p-6 md:p-8">
             <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
               <div class="space-y-2">
                 <span class="text-secondary ml-1 block text-sm font-semibold">Account type</span>
@@ -69,7 +69,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                 >
                   @for (option of roleOptions; track option.value) {
                     <label
-                      class="border-outline-variant/20 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 bg-surface-container-low neumorphic-inset flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 transition-all"
+                      class="ghost-outline has-[input:checked]:bg-primary/5 bg-surface-container-low flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 transition-all"
                     >
                       <input
                         type="radio"
@@ -106,7 +106,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       type="text"
                       autocomplete="given-name"
                       placeholder="e.g. Alex"
-                      class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-4 pl-11 transition-all focus:ring-2"
+                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </div>
@@ -129,7 +129,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       type="text"
                       autocomplete="family-name"
                       placeholder="e.g. Rivera"
-                      class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-4 pl-11 transition-all focus:ring-2"
+                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </div>
@@ -150,7 +150,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                     type="email"
                     autocomplete="email"
                     placeholder="name@example.com"
-                    class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-4 pl-11 transition-all focus:ring-2"
+                    class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -171,7 +171,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       type="tel"
                       autocomplete="tel"
                       placeholder="+20 100 123 4567"
-                      class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-4 pl-11 transition-all focus:ring-2"
+                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </div>
@@ -189,7 +189,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       id="reg-dob"
                       formControlName="date_of_birth"
                       type="date"
-                      class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-4 pl-11 transition-all focus:ring-2"
+                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                   @if (
@@ -216,7 +216,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                     [type]="showPassword() ? 'text' : 'password'"
                     autocomplete="new-password"
                     placeholder="At least 8 characters"
-                    class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-11 pl-11 transition-all focus:ring-2"
+                    class="input-ui pl-11 pr-11 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                   />
                   <button
                     type="button"
@@ -272,7 +272,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                     [type]="showConfirmPassword() ? 'text' : 'password'"
                     autocomplete="new-password"
                     placeholder="Repeat password"
-                    class="placeholder:text-outline-variant/60 focus:ring-primary/20 bg-surface-container-low neumorphic-inset w-full rounded-2xl border-none py-3 pr-11 pl-11 transition-all focus:ring-2"
+                    class="input-ui pl-11 pr-11 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                   />
                   <button
                     type="button"
@@ -321,7 +321,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                   type="button"
                   (click)="continueWithGoogle()"
                   [disabled]="googleLoading()"
-                  class="bg-surface-container-low neumorphic-inset mt-3 flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-3 font-bold text-on-surface transition-all hover:-translate-y-0.5 active:scale-95 disabled:pointer-events-none disabled:opacity-60"
+                  class="mt-3 flex w-full items-center justify-center gap-3 rounded-2xl bg-surface-container-low px-5 py-3 font-bold text-on-surface transition-all hover:-translate-y-0.5 active:scale-95 disabled:pointer-events-none disabled:opacity-60"
                 >
                   <svg class="h-5 w-5" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
                     <path
@@ -348,7 +348,10 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                 </p>
               }
             </form>
-            <div class="border-outline-variant/10 mt-6 border-t pt-6 text-center">
+            <div class="mt-6 text-center">
+              <div
+                class="mb-5 h-px bg-linear-to-r from-transparent via-outline-variant/20 to-transparent"
+              ></div>
               <p class="text-on-surface-variant text-sm font-medium">
                 Already registered?
                 <a

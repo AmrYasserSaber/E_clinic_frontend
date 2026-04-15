@@ -66,9 +66,7 @@ interface RequestRow {
         } @else {
           <div class="space-y-4">
             @for (item of vm.items; track item.id) {
-              <article
-                class="rounded-2xl bg-surface-container-lowest p-5 neumorphic-card border border-primary/5"
-              >
+              <article class="card-surface rounded-3xl p-5">
                 <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div class="space-y-1">
                     <h3 class="text-lg font-bold text-on-surface">{{ item.patientName }}</h3>
@@ -82,7 +80,7 @@ interface RequestRow {
                     <p class="text-sm text-on-surface">Reason: {{ item.reason || '—' }}</p>
                   </div>
                   <button
-                    class="px-5 py-2.5 rounded-xl bg-primary text-white font-semibold hover:opacity-90 disabled:opacity-60"
+                    class="btn-primary"
                     (click)="confirm(item.id)"
                     [disabled]="vm.confirmingIds.has(item.id)"
                   >

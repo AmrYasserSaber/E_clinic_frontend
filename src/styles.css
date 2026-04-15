@@ -65,6 +65,7 @@
   --mf-surface-card: #ffffff;
   --mf-text: #1f2937;
   --mf-muted: #64748b;
+  --mf-outline: color-mix(in srgb, var(--color-outline) 15%, transparent);
 }
 
 * {
@@ -96,21 +97,26 @@ button:disabled {
 
 .shadow-soft {
   box-shadow:
-    -4px -4px 12px rgba(255, 255, 255, 0.8),
-    4px 4px 12px rgba(0, 0, 0, 0.06);
+    0px 4px 20px rgba(0, 31, 40, 0.04),
+    0px 10px 40px rgba(0, 31, 40, 0.08);
 }
 
 .card-surface {
   background: var(--mf-surface-card);
   border-radius: 1rem;
   box-shadow:
-    -4px -4px 12px rgba(255, 255, 255, 0.72),
-    4px 4px 12px rgba(15, 23, 42, 0.06);
+    0px 4px 20px rgba(0, 31, 40, 0.04),
+    0px 10px 40px rgba(0, 31, 40, 0.08);
 }
 
 .glass-panel {
-  backdrop-filter: blur(20px);
-  background: color-mix(in srgb, var(--mf-surface-card) 70%, transparent);
+  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--mf-surface-card) 80%, transparent);
+}
+
+.ghost-outline {
+  outline: 1px solid var(--mf-outline);
+  outline-offset: 0px;
 }
 
 .btn-primary {
@@ -120,7 +126,7 @@ button:disabled {
   font-size: 0.875rem;
   font-weight: 600;
   color: white;
-  background: linear-gradient(120deg, var(--mf-primary), #0098b8);
+  background: linear-gradient(120deg, var(--mf-primary), var(--color-primary-container));
   cursor: pointer;
 }
 
@@ -130,28 +136,45 @@ button:disabled {
 }
 
 .btn-secondary {
-  border: 1px solid #dbe3e8;
+  border: none;
   border-radius: 999px;
   padding: 0.5rem 0.9rem;
   font-size: 0.875rem;
   color: #0f172a;
-  background: #fff;
+  background: color-mix(in srgb, var(--color-surface-container-high) 70%, transparent);
   cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: var(--color-surface-container-high);
+}
+
+.btn-tertiary {
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.875rem;
+  color: var(--color-on-surface-variant);
+  background: transparent;
+}
+
+.btn-tertiary:hover {
+  background: var(--color-surface-container-high);
 }
 
 .input-ui {
   width: 100%;
   border-radius: 0.9rem;
-  border: 1px solid #d8e0e8;
-  background: #fff;
+  border: none;
+  background: var(--color-surface-container-highest);
   padding: 0.65rem 0.8rem;
   font-size: 0.9rem;
 }
 
 .input-ui:focus {
   outline: none;
-  border-color: color-mix(in srgb, var(--mf-primary) 40%, #d8e0e8);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--mf-primary) 20%, transparent);
+  background: var(--color-surface-container-lowest);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-outline-variant) 15%, transparent);
 }
 
 .material-symbols-outlined {
@@ -164,14 +187,7 @@ button:disabled {
   vertical-align: middle;
 }
 
-.neumorphic-card {
-  box-shadow:
-    -12px -12px 24px rgba(255, 255, 255, 0.9),
-    12px 12px 24px rgba(0, 0, 0, 0.04);
-}
-
+.neumorphic-card,
 .neumorphic-inset {
-  box-shadow:
-    inset 4px 4px 8px rgba(0, 0, 0, 0.03),
-    inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  box-shadow: none;
 }

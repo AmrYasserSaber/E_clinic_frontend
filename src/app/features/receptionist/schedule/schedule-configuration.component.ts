@@ -40,24 +40,6 @@ type DayGroup = FormGroup<{
   imports: [AsyncPipe, ReactiveFormsModule, NgClass],
   templateUrl: './schedule-configuration.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: [
-    `
-      .neumorphic-inset {
-        box-shadow:
-          inset 4px 4px 8px rgba(0, 0, 0, 0.04),
-          inset -4px -4px 8px rgba(255, 255, 255, 0.8);
-      }
-      .neumorphic-card {
-        box-shadow:
-          4px 4px 12px rgba(0, 0, 0, 0.06),
-          -4px -4px 12px rgba(255, 255, 255, 0.8);
-      }
-      .glass-panel {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(20px);
-      }
-    `,
-  ],
 })
 export class ScheduleConfigurationComponent {
   private readonly fb = inject(FormBuilder);
@@ -154,6 +136,10 @@ export class ScheduleConfigurationComponent {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe();
+  }
+
+  isEndTimeInvalid(group: DayGroup): boolean {
+    return this.hasInvalidTime(group);
   }
 
   cancelChanges(): void {

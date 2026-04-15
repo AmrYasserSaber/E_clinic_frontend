@@ -15,12 +15,12 @@ import { ToastVariant } from './toast.types';
         <div
           [attr.role]="toast.variant === 'error' ? 'alert' : 'status'"
           [attr.aria-live]="toast.variant === 'error' ? 'assertive' : 'polite'"
-          class="toast-surface pointer-events-auto flex w-full max-w-md origin-top animate-toast-in flex-row gap-3 rounded-2xl border p-4 shadow-lg backdrop-blur-sm sm:ml-auto"
+          class="toast-surface ghost-outline pointer-events-auto flex w-full max-w-md origin-top animate-toast-in flex-row gap-3 rounded-2xl p-4 shadow-soft backdrop-blur-sm sm:ml-auto"
           [ngClass]="{
-            'border-primary/25 bg-primary/5': toast.variant === 'success',
-            'border-error/30 bg-error/8': toast.variant === 'error',
-            'border-secondary/25 bg-secondary-fixed/25': toast.variant === 'warning',
-            'border-outline-variant/30 bg-surface-container-low/90': toast.variant === 'info',
+            'bg-primary/5': toast.variant === 'success',
+            'bg-error/8': toast.variant === 'error',
+            'bg-secondary-fixed/25': toast.variant === 'warning',
+            'bg-surface-container-low/90': toast.variant === 'info',
           }"
         >
           <span

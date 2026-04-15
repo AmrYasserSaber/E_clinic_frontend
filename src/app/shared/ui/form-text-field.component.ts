@@ -6,14 +6,17 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
   standalone: true,
   imports: [ReactiveFormsModule],
   template: `
-    <label class="mb-1 block text-sm font-medium text-slate-700">{{ label() }}</label>
+    <label
+      class="mb-1 block text-xs font-semibold uppercase tracking-wide text-on-surface-variant"
+      >{{ label() }}</label
+    >
     <input
-      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none"
+      class="input-ui"
       [type]="type()"
       [placeholder]="placeholder()"
       [formControl]="control()"
     />
-  `
+  `,
 })
 export class FormTextFieldComponent {
   readonly label = input.required<string>();

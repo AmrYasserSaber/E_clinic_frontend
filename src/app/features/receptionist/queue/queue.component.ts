@@ -1,5 +1,5 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { BehaviorSubject, EMPTY, combineLatest, interval, of } from 'rxjs';
 import { catchError, finalize, map, startWith, switchMap, tap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -7,6 +7,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { QueueFilter, QueueItem, QueueService } from './queue.service';
 import { QueueFiltersComponent } from './components/queue-filters.component';
 import { QueueListComponent } from './components/queue-list.component';
+import { PageHeaderComponent } from '../../../shared/ui/page-header.component';
 
 interface QueueVm {
   loading: boolean;
@@ -20,30 +21,9 @@ interface QueueVm {
 @Component({
   selector: 'app-queue-page',
   standalone: true,
-  imports: [AsyncPipe, DatePipe, QueueFiltersComponent, QueueListComponent],
+  imports: [AsyncPipe, DatePipe, PageHeaderComponent, QueueFiltersComponent, QueueListComponent],
   templateUrl: './queue.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: [
-    `
-      .soft-neumorphic {
-        box-shadow:
-          -5px -5px 15px rgba(255, 255, 255, 0.8),
-          8px 8px 20px rgba(0, 180, 216, 0.05);
-      }
-      .soft-neumorphic-inset {
-        box-shadow:
-          inset -2px -2px 5px rgba(255, 255, 255, 0.8),
-          inset 3px 3px 8px rgba(0, 180, 216, 0.04);
-      }
-      .material-symbols-outlined {
-        font-variation-settings:
-          'FILL' 0,
-          'wght' 400,
-          'GRAD' 0,
-          'opsz' 24;
-      }
-    `,
-  ],
 })
 export class QueueComponent {
   private readonly queueService = inject(QueueService);
@@ -54,6 +34,7 @@ export class QueueComponent {
   private readonly queue$ = new BehaviorSubject<QueueItem[]>([]);
   private readonly filter$ = new BehaviorSubject<QueueFilter>('ALL');
   private readonly updatedAt$ = new BehaviorSubject<Date | null>(null);
+  protected readonly noShowTarget = signal<QueueItem | null>(null);
 
   readonly vm$ = combineLatest({
     loading: this.loading$,
@@ -70,7 +51,7 @@ export class QueueComponent {
         lastUpdated: state.lastUpdated,
         filter: state.filter,
         list: filtered,
-        waitingCount: state.all.filter((x) => x.status === 'CONFIRMED').length,
+        waitingCount: state.all.filter((x) => x.status === 'CHECKED_IN').length,
       } as QueueVm;
     }),
   );
@@ -113,6 +94,20 @@ export class QueueComponent {
   }
 
   onNoShow(id: number): void {
+    const target = this.queue$.value.find((x) => x.id === id) ?? null;
+    this.noShowTarget.set(target);
+  }
+
+  protected closeNoShowDialog(): void {
+    this.noShowTarget.set(null);
+  }
+
+  protected confirmNoShow(): void {
+    const target = this.noShowTarget();
+    if (!target) return;
+    const id = target.id;
+    this.noShowTarget.set(null);
+
     const previous = this.queue$.value;
     this.queue$.next(previous.filter((x) => x.id !== id));
 
@@ -177,7 +172,7 @@ export class QueueComponent {
   }
 
   private applyFilter(items: QueueItem[], filter: QueueFilter): QueueItem[] {
-    if (filter === 'WAITING') return items.filter((x) => x.status === 'CONFIRMED');
+    if (filter === 'WAITING') return items.filter((x) => x.status === 'CHECKED_IN');
     return items;
   }
 }

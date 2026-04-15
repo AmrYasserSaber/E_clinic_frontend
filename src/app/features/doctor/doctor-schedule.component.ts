@@ -17,18 +17,20 @@ import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
 
     <section class="card-surface mb-5 p-5">
       <div class="mb-4">
-        <h2 class="text-lg font-semibold text-slate-900">Upcoming 7 Days</h2>
-        <p class="text-xs text-slate-500">From {{ todayIso }} to {{ datePlusSevenIso }}</p>
+        <h2 class="text-lg font-semibold text-(--color-on-surface)">Upcoming 7 Days</h2>
+        <p class="text-xs text-on-surface-variant">From {{ todayIso }} to {{ datePlusSevenIso }}</p>
       </div>
 
       @if (upcomingError()) {
-        <p class="mb-3 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p
+          class="ghost-outline mb-3 rounded-2xl bg-error/8 px-3 py-2 text-sm font-medium text-error"
+        >
           {{ upcomingError() }}
         </p>
       }
 
       @if (loadingUpcoming()) {
-        <p class="text-sm text-slate-500">Loading appointments...</p>
+        <p class="text-sm text-on-surface-variant">Loading appointments...</p>
       } @else if (upcoming().length === 0) {
         <app-empty-state
           title="No upcoming appointments"
@@ -37,11 +39,13 @@ import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
       } @else {
         <div class="space-y-3">
           @for (appt of upcoming(); track appt.id) {
-            <article class="rounded-xl border border-slate-100 bg-white p-3">
+            <article class="rounded-3xl bg-surface-container-low p-3">
               <div class="flex items-start justify-between gap-2">
                 <div>
-                  <p class="text-sm font-semibold text-slate-900">{{ patientName(appt) }}</p>
-                  <p class="text-xs text-slate-500">
+                  <p class="text-sm font-semibold text-(--color-on-surface)">
+                    {{ patientName(appt) }}
+                  </p>
+                  <p class="text-xs text-on-surface-variant">
                     {{ appt.appointment_date }} at {{ appt.appointment_time }}
                   </p>
                 </div>
@@ -61,34 +65,36 @@ import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
       </div>
     } @else if (error()) {
       <section class="card-surface space-y-3 p-5">
-        <p class="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ error() }}</p>
+        <p class="ghost-outline rounded-2xl bg-error/8 px-3 py-2 text-sm font-medium text-error">
+          {{ error() }}
+        </p>
         <button class="btn-primary" type="button" (click)="loadSchedule()">Retry</button>
       </section>
     } @else if (scheduleDays().length > 0) {
       <div class="space-y-5">
         @for (day of scheduleDays(); track day.date) {
           <section class="card-surface p-5">
-            <h2 class="mb-3 text-base font-semibold text-slate-900">{{ formatDate(day.date) }}</h2>
+            <h2 class="mb-3 text-base font-semibold text-(--color-on-surface)">
+              {{ formatDate(day.date) }}
+            </h2>
 
             <div class="space-y-2">
               @for (slot of day.slots; track slot.id) {
                 <article
-                  class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-3"
+                  class="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-surface-container-low p-3"
                 >
                   <div>
-                    <p class="text-sm font-semibold text-slate-900">
+                    <p class="text-sm font-semibold text-(--color-on-surface)">
                       {{ slot.start_time }} - {{ slot.end_time }}
                     </p>
-                    <p class="text-xs text-slate-500">Duration: {{ slot.duration_minutes }} min</p>
+                    <p class="text-xs text-on-surface-variant">
+                      Duration: {{ slot.duration_minutes }} min
+                    </p>
                   </div>
 
                   <span
-                    class="rounded-full px-3 py-1 text-xs font-semibold"
-                    [class]="
-                      slot.is_available
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-slate-200 text-slate-700'
-                    "
+                    class="glass-panel rounded-full px-3 py-1 text-xs font-semibold tracking-wide"
+                    [class]="slot.is_available ? 'text-secondary' : 'text-on-surface-variant'"
                   >
                     {{ slot.is_available ? 'Available' : 'Booked' }}
                   </span>

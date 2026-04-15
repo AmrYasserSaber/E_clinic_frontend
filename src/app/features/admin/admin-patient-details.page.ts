@@ -4,48 +4,58 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize, timeout } from 'rxjs';
 import { AdminService, PatientRow } from '../../services/admin.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
-import { AdminNavComponent } from './admin-nav.component';
 
 @Component({
   standalone: true,
-  imports: [PageHeaderComponent, RouterLink, AdminNavComponent],
+  imports: [PageHeaderComponent, RouterLink],
   template: `
     <app-page-header title="Patient Details" subtitle="Read-only patient profile details." />
-    <app-admin-nav />
-    <a class="mb-3 inline-block text-sm text-cyan-700 underline" routerLink="/admin/patients">Back to patients</a>
+    <a
+      class="mb-3 inline-block text-sm text-(--color-primary) underline"
+      routerLink="/admin/patients"
+      >Back to patients</a
+    >
     <div class="card-surface p-4">
       @if (errorText) {
-        <p class="text-sm text-rose-600">{{ errorText }}</p>
+        <p class="text-sm text-error">{{ errorText }}</p>
       } @else if (isLoading) {
-        <p class="text-sm text-slate-500">Loading patient details...</p>
+        <p class="text-sm text-on-surface-variant">Loading patient details...</p>
       } @else if (!patient) {
-        <p class="text-sm text-slate-500">No patient details found.</p>
+        <p class="text-sm text-on-surface-variant">No patient details found.</p>
       } @else {
         <div class="grid gap-3 md:grid-cols-2">
           <div>
-            <p class="text-xs uppercase text-slate-500">Name</p>
-            <p class="text-sm">{{ patient.first_name }} {{ patient.last_name }}</p>
+            <p class="text-xs uppercase text-on-surface-variant">Name</p>
+            <p class="text-sm font-semibold text-(--color-on-surface)">
+              {{ patient.first_name }} {{ patient.last_name }}
+            </p>
           </div>
           <div>
-            <p class="text-xs uppercase text-slate-500">Email</p>
-            <p class="text-sm">{{ patient.email }}</p>
+            <p class="text-xs uppercase text-on-surface-variant">Email</p>
+            <p class="text-sm font-semibold text-(--color-on-surface)">{{ patient.email }}</p>
           </div>
           <div>
-            <p class="text-xs uppercase text-slate-500">Phone</p>
-            <p class="text-sm">{{ patient.phone_number ?? '—' }}</p>
+            <p class="text-xs uppercase text-on-surface-variant">Phone</p>
+            <p class="text-sm font-semibold text-(--color-on-surface)">
+              {{ patient.phone_number ?? '—' }}
+            </p>
           </div>
           <div>
-            <p class="text-xs uppercase text-slate-500">Date of birth</p>
-            <p class="text-sm">{{ patient.date_of_birth ?? '—' }}</p>
+            <p class="text-xs uppercase text-on-surface-variant">Date of birth</p>
+            <p class="text-sm font-semibold text-(--color-on-surface)">
+              {{ patient.date_of_birth ?? '—' }}
+            </p>
           </div>
           <div>
-            <p class="text-xs uppercase text-slate-500">Active</p>
-            <p class="text-sm">{{ patient.is_active ? 'Yes' : 'No' }}</p>
+            <p class="text-xs uppercase text-on-surface-variant">Active</p>
+            <p class="text-sm font-semibold text-(--color-on-surface)">
+              {{ patient.is_active ? 'Yes' : 'No' }}
+            </p>
           </div>
         </div>
       }
     </div>
-  `
+  `,
 })
 export class AdminPatientDetailsPage {
   private readonly route = inject(ActivatedRoute);
@@ -64,13 +74,14 @@ export class AdminPatientDetailsPage {
       return;
     }
 
-    this.adminService.patientDetails(id)
+    this.adminService
+      .patientDetails(id)
       .pipe(
         timeout(7000),
         finalize(() => {
           this.isLoading = false;
           this.cdr.markForCheck();
-        })
+        }),
       )
       .subscribe({
         next: (patient) => {
@@ -79,9 +90,12 @@ export class AdminPatientDetailsPage {
           this.cdr.markForCheck();
         },
         error: (error: unknown) => {
-          this.errorText = this.readError(error, 'Loading patient details took too long. Please try again.');
+          this.errorText = this.readError(
+            error,
+            'Loading patient details took too long. Please try again.',
+          );
           this.cdr.markForCheck();
-        }
+        },
       });
   }
 

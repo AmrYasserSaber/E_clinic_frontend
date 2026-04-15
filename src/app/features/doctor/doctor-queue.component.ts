@@ -25,25 +25,34 @@ import { ConsultationModalComponent } from './consultation-modal.component';
     ConsultationModalComponent,
   ],
   template: `
-    <app-page-header title="Doctor Queue" subtitle="Live queue view for confirmed and checked-in patients." />
+    <app-page-header
+      title="Doctor Queue"
+      subtitle="Live queue view for confirmed and checked-in patients."
+    />
 
     <section class="card-surface p-5">
       <div class="mb-4 flex items-center justify-between">
         <div>
-          <h2 class="text-lg font-semibold text-slate-900">Today's Queue</h2>
-          <p class="text-xs text-slate-500">Date: {{ queueDate() }}</p>
+          <h2 class="text-lg font-semibold text-(--color-on-surface)">Today's Queue</h2>
+          <p class="text-xs text-on-surface-variant">Date: {{ queueDate() }}</p>
         </div>
-        <span class="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
+        <span
+          class="glass-panel rounded-full px-3 py-1 text-xs font-semibold text-(--color-primary)"
+        >
           Auto-refresh 30s
         </span>
       </div>
 
       @if (queueError()) {
-        <p class="mb-3 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ queueError() }}</p>
+        <p
+          class="ghost-outline mb-3 rounded-2xl bg-error/8 px-3 py-2 text-sm font-medium text-error"
+        >
+          {{ queueError() }}
+        </p>
       }
 
       @if (loadingQueue()) {
-        <p class="text-sm text-slate-500">Loading queue...</p>
+        <p class="text-sm text-on-surface-variant">Loading queue...</p>
       } @else if (queue().length === 0) {
         <app-empty-state
           title="Queue is currently empty"
@@ -52,14 +61,15 @@ import { ConsultationModalComponent } from './consultation-modal.component';
       } @else {
         <div class="space-y-3">
           @for (item of queue(); track item.id; let i = $index) {
-            <article class="rounded-xl border border-slate-100 bg-white p-4 shadow-soft">
+            <article class="card-surface rounded-3xl p-4">
               <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div class="space-y-1">
-                  <p class="font-semibold text-slate-900">{{ item.patient_full_name }}</p>
-                  <p class="text-xs text-slate-500">
-                    Queue #{{ i + 1 }}
-                    · Check-in: {{ formatCheckInTime(item.check_in_time) }}
-                    · Waiting: {{ waitingLabel(item.waiting_time_minutes) }}
+                  <p class="font-semibold text-(--color-on-surface)">
+                    {{ item.patient_full_name }}
+                  </p>
+                  <p class="text-xs text-on-surface-variant">
+                    Queue #{{ i + 1 }} · Check-in: {{ formatCheckInTime(item.check_in_time) }} ·
+                    Waiting: {{ waitingLabel(item.waiting_time_minutes) }}
                   </p>
                 </div>
 
@@ -114,8 +124,8 @@ import { ConsultationModalComponent } from './consultation-modal.component';
     @if (declineTarget()) {
       <div class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/40 p-4">
         <div class="card-surface w-full max-w-md p-5">
-          <h3 class="text-base font-semibold text-slate-900">Decline Appointment</h3>
-          <p class="mt-1 text-sm text-slate-600">Reason is optional.</p>
+          <h3 class="text-base font-semibold text-(--color-on-surface)">Decline Appointment</h3>
+          <p class="mt-1 text-sm text-on-surface-variant">Reason is optional.</p>
 
           <textarea
             class="input-ui mt-3 min-h-24"
@@ -124,7 +134,9 @@ import { ConsultationModalComponent } from './consultation-modal.component';
           ></textarea>
 
           <div class="mt-4 flex justify-end gap-2">
-            <button class="btn-secondary" type="button" (click)="closeDeclineDialog()">Cancel</button>
+            <button class="btn-secondary" type="button" (click)="closeDeclineDialog()">
+              Cancel
+            </button>
             <button
               class="btn-primary"
               type="button"
@@ -141,13 +153,15 @@ import { ConsultationModalComponent } from './consultation-modal.component';
     @if (noShowTarget()) {
       <div class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/40 p-4">
         <div class="card-surface w-full max-w-md p-5">
-          <h3 class="text-base font-semibold text-slate-900">Mark No-Show</h3>
-          <p class="mt-1 text-sm text-slate-600">
+          <h3 class="text-base font-semibold text-(--color-on-surface)">Mark No-Show</h3>
+          <p class="mt-1 text-sm text-on-surface-variant">
             Are you sure you want to mark {{ noShowTarget()!.patient_full_name }} as no-show?
           </p>
 
           <div class="mt-4 flex justify-end gap-2">
-            <button class="btn-secondary" type="button" (click)="closeNoShowDialog()">Cancel</button>
+            <button class="btn-secondary" type="button" (click)="closeNoShowDialog()">
+              Cancel
+            </button>
             <button
               class="btn-primary"
               type="button"
