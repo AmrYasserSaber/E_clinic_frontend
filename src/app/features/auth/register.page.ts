@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -8,6 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../services/auth.service';
 import { AuthStore } from '../../core/auth/auth.store';
 import { ToastService } from '../../core/toast/toast.service';
@@ -86,6 +87,36 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                   approval.
                 </p>
               </div>
+              @if (form.controls.role.value === 'doctor') {
+                <div class="space-y-2">
+                  <label
+                    class="text-secondary ml-1 block text-sm font-semibold"
+                    for="reg-specialty"
+                  >
+                    Specialty
+                  </label>
+                  <div class="relative">
+                    <span
+                      class="material-symbols-outlined text-outline-variant pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-xl"
+                    >
+                      stethoscope
+                    </span>
+                    <input
+                      id="reg-specialty"
+                      formControlName="specialty"
+                      type="text"
+                      autocomplete="organization-title"
+                      placeholder="e.g. Cardiology"
+                      class="input-ui !pl-11 !pr-4 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+                  @if (
+                    form.controls.specialty.touched && form.controls.specialty.errors?.['required']
+                  ) {
+                    <p class="text-error ml-1 text-xs font-medium">Specialty is required.</p>
+                  }
+                </div>
+              }
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div class="space-y-2">
                   <label
@@ -106,7 +137,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       type="text"
                       autocomplete="given-name"
                       placeholder="e.g. Alex"
-                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                      class="input-ui !pl-11 !pr-4 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </div>
@@ -129,7 +160,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       type="text"
                       autocomplete="family-name"
                       placeholder="e.g. Rivera"
-                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                      class="input-ui !pl-11 !pr-4 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </div>
@@ -150,7 +181,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                     type="email"
                     autocomplete="email"
                     placeholder="name@example.com"
-                    class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                    class="input-ui !pl-11 !pr-4 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -171,7 +202,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       type="tel"
                       autocomplete="tel"
                       placeholder="+20 100 123 4567"
-                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                      class="input-ui !pl-11 !pr-4 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </div>
@@ -189,7 +220,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       id="reg-dob"
                       formControlName="date_of_birth"
                       type="date"
-                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                      class="input-ui !pl-11 !pr-4 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                   @if (
@@ -216,7 +247,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                     [type]="showPassword() ? 'text' : 'password'"
                     autocomplete="new-password"
                     placeholder="At least 8 characters"
-                    class="input-ui pl-11 pr-11 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                    class="input-ui !pl-11 !pr-11 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                   />
                   <button
                     type="button"
@@ -272,7 +303,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                     [type]="showConfirmPassword() ? 'text' : 'password'"
                     autocomplete="new-password"
                     placeholder="Repeat password"
-                    class="input-ui pl-11 pr-11 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                    class="input-ui !pl-11 !pr-11 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                   />
                   <button
                     type="button"
@@ -389,6 +420,7 @@ export class RegisterPage {
   private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
   protected readonly googleLoading = signal(false);
@@ -410,6 +442,7 @@ export class RegisterPage {
       }),
       first_name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
       last_name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      specialty: new FormControl('', { nonNullable: true }),
       email: new FormControl('', {
         nonNullable: true,
         validators: [Validators.required, Validators.email],
@@ -435,6 +468,24 @@ export class RegisterPage {
     { validators: [AuthValidators.signupPasswordPolicy()] },
   );
 
+  constructor() {
+    this.form.controls.role.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((role: SignupRole) => this.updateSpecialtyValidation(role));
+    this.updateSpecialtyValidation(this.form.controls.role.value);
+  }
+
+  private updateSpecialtyValidation(role: SignupRole): void {
+    if (role !== 'doctor') {
+      this.form.controls.specialty.clearValidators();
+      this.form.controls.specialty.setValue('', { emitEvent: false });
+      this.form.controls.specialty.updateValueAndValidity({ emitEvent: false });
+      return;
+    }
+    this.form.controls.specialty.setValidators([Validators.required]);
+    this.form.controls.specialty.updateValueAndValidity({ emitEvent: false });
+  }
+
   togglePassword(): void {
     this.showPassword.update((v) => !v);
   }
@@ -452,6 +503,7 @@ export class RegisterPage {
     this.loading.set(true);
     const phone = raw.phone_number.trim();
     const dob = raw.date_of_birth;
+    const specialty = raw.specialty.trim();
     this.authService
       .register({
         first_name: raw.first_name.trim(),
@@ -461,6 +513,7 @@ export class RegisterPage {
         ...(phone.length > 0 ? { phone_number: phone } : {}),
         ...(dob ? { date_of_birth: dob } : {}),
         role: raw.role,
+        ...(raw.role === 'doctor' && specialty.length > 0 ? { specialty } : {}),
       })
       .subscribe({
         next: (response) => {
