@@ -4,7 +4,6 @@ import { AppShellComponent } from './layout/app-shell.component';
 import { ChangePasswordPage } from './features/system/change-password.page';
 import { ForbiddenPage } from './features/system/forbidden.page';
 import { NotFoundPage } from './features/system/not-found.page';
-import { SettingsPage } from './features/system/settings.page';
 
 export const routes: Routes = [
   {
@@ -42,7 +41,6 @@ export const routes: Routes = [
         data: { roles: ['admin'] },
         loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
       },
-      { path: 'settings', component: SettingsPage },
       { path: 'account/change-password', component: ChangePasswordPage },
       { path: 'forbidden', component: ForbiddenPage },
       { path: '', pathMatch: 'full', redirectTo: 'patient/dashboard' },
