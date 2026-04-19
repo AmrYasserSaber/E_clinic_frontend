@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { rootLandingGuard } from './core/guards/root-landing.guard';
 import { AppShellComponent } from './layout/app-shell.component';
 import { ChangePasswordPage } from './features/system/change-password.page';
 import { ForbiddenPage } from './features/system/forbidden.page';
@@ -7,6 +8,13 @@ import { NotFoundPage } from './features/system/not-found.page';
 import { SettingsPage } from './features/system/settings.page';
 
 export const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    canActivate: [rootLandingGuard],
+    loadComponent: () => import('./features/landing/landing.page').then((m) => m.LandingPage),
+  },
+  { path: 'welcome', redirectTo: '', pathMatch: 'full' },
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
