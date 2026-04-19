@@ -226,7 +226,7 @@ export class PatientProfilePage implements OnInit {
     if (this.form.invalid) return;
     this.isSaving = true;
     const v = this.form.getRawValue();
-    const phoneNumber: string = v.phone_number.trim();
+    const phoneNumber: string | null = v.phone_number ? v.phone_number.trim() : null;
     const dateOfBirth: string = v.date_of_birth.trim();
     const payload: Partial<{
       first_name: string;
