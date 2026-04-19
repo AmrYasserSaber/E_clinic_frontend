@@ -41,6 +41,15 @@ export interface AppointmentApiDto {
   } | null;
   created_at?: string;
   updated_at?: string;
+  reschedule_history?: Array<{
+    old_date: string;
+    old_time: string;
+    new_date: string;
+    new_time: string;
+    changed_by?: { id: number; first_name: string; last_name: string; email: string } | null;
+    reason?: string | null;
+    changed_at?: string | null;
+  }>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -115,7 +124,7 @@ export class AppointmentsService {
     const d = row.doctor_info;
     const nameParts = [d?.first_name, d?.last_name].filter((p) => !!p && String(p).trim());
     const full = nameParts.join(' ').trim();
-    const displayName = full ? `Dr. ${full}` : d?.email ?? 'Your doctor';
+    const displayName = full ? `Dr. ${full}` : (d?.email ?? 'Your doctor');
 
     return {
       id: String(row.id),
@@ -143,6 +152,19 @@ export class AppointmentsService {
             })),
           }
         : null,
+      rescheduleHistory: (row as any).reschedule_history
+        ? (row.reschedule_history as any[]).map((r) => ({
+            oldDate: r.old_date,
+            oldTime: r.old_time,
+            newDate: r.new_date,
+            newTime: r.new_time,
+            changedBy: r.changed_by
+              ? `${r.changed_by.first_name} ${r.changed_by.last_name}`.trim()
+              : null,
+            reason: r.reason ?? null,
+            changedAt: r.changed_at ?? null,
+          }))
+        : [],
     };
   }
 }

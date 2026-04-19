@@ -44,6 +44,17 @@ export interface Appointment {
   status: AppointmentStatus;
   checkInTime?: string | null;
   consultationSummary?: ConsultationSummary | null;
+  rescheduleHistory?: RescheduleHistoryEntry[];
+}
+
+export interface RescheduleHistoryEntry {
+  oldDate: string;
+  oldTime: string;
+  newDate: string;
+  newTime: string;
+  changedBy?: string | null;
+  reason?: string | null;
+  changedAt?: string | null;
 }
 
 export interface ConsultationPrescriptionItem {
@@ -66,6 +77,8 @@ export interface Slot {
   date: string;
   startTime: string;
   endTime: string;
+  // returned by the backend to indicate whether the slot is currently free
+  is_available?: boolean;
 }
 
 export interface QueueItem {

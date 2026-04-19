@@ -13,6 +13,13 @@ interface AppointmentApiRow {
   status: string;
   patient_info?: { first_name?: string; last_name?: string; email?: string };
   doctor_info?: { first_name?: string; last_name?: string };
+  reschedule_history?: Array<{
+    old_date?: string | null;
+    old_time?: string | null;
+    new_date?: string | null;
+    new_time?: string | null;
+    changed_at?: string | null;
+  }>;
 }
 
 interface RequestRow {
@@ -22,6 +29,12 @@ interface RequestRow {
   doctorName: string;
   date: string;
   time: string;
+  // reschedule details (when present)
+  isReschedule?: boolean;
+  oldDate?: string | null;
+  oldTime?: string | null;
+  newDate?: string | null;
+  newTime?: string | null;
   reason: string;
 }
 
@@ -69,12 +82,29 @@ interface RequestRow {
               <article class="card-surface rounded-3xl p-5">
                 <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div class="space-y-1">
-                    <h3 class="text-lg font-bold text-on-surface">{{ item.patientName }}</h3>
+                    <div class="flex items-center gap-3">
+                      <h3 class="text-lg font-bold text-on-surface">{{ item.patientName }}</h3>
+                      @if (item.isReschedule) {
+                        <span
+                          class="rounded-full bg-primary/10 text-primary px-2 py-1 text-xs font-semibold"
+                        >
+                          Reschedule request
+                        </span>
+                      }
+                    </div>
                     <p class="text-sm text-on-surface-variant">
                       {{ item.patientEmail || 'No email' }}
                     </p>
                     <p class="text-sm text-on-surface-variant">
-                      {{ item.date | date: 'fullDate' }} • {{ item.time }}
+                      @if (item.isReschedule) {
+                        <span class="font-semibold text-(--color-primary)">Old</span>
+                        {{ item.oldDate | date: 'fullDate' }} • {{ item.oldTime }}
+                        <span class="mx-2">→</span>
+                        <span class="font-semibold text-(--color-primary)">New</span>
+                        {{ item.newDate | date: 'fullDate' }} • {{ item.newTime }}
+                      } @else {
+                        {{ item.date | date: 'fullDate' }} • {{ item.time }}
+                      }
                     </p>
                     <p class="text-sm font-semibold text-primary">Doctor: {{ item.doctorName }}</p>
                     <p class="text-sm text-on-surface">Reason: {{ item.reason || '—' }}</p>
@@ -175,18 +205,27 @@ export class AppointmentRequestsComponent {
 
     return this.http.get<AppointmentApiRow[]>('/api/appointments/', { params }).pipe(
       map((rows) =>
-        rows.map((row) => ({
-          id: row.id,
-          patientName:
-            `${row.patient_info?.first_name ?? ''} ${row.patient_info?.last_name ?? ''}`.trim(),
-          patientEmail: row.patient_info?.email ?? '',
-          doctorName:
-            `${row.doctor_info?.first_name ?? ''} ${row.doctor_info?.last_name ?? ''}`.trim() ||
-            'Assigned Doctor',
-          date: row.appointment_date,
-          time: (row.appointment_time ?? '').slice(0, 5),
-          reason: row.reason ?? '',
-        })),
+        rows.map((row) => {
+          const isReschedule = !!(row.reschedule_history && row.reschedule_history.length > 0);
+          const rh = isReschedule ? row.reschedule_history![0] : null;
+          return {
+            id: row.id,
+            patientName:
+              `${row.patient_info?.first_name ?? ''} ${row.patient_info?.last_name ?? ''}`.trim(),
+            patientEmail: row.patient_info?.email ?? '',
+            doctorName:
+              `${row.doctor_info?.first_name ?? ''} ${row.doctor_info?.last_name ?? ''}`.trim() ||
+              'Assigned Doctor',
+            date: row.appointment_date,
+            time: (row.appointment_time ?? '').slice(0, 5),
+            isReschedule,
+            oldDate: rh?.old_date ?? null,
+            oldTime: rh?.old_time ?? null,
+            newDate: rh?.new_date ?? row.appointment_date,
+            newTime: rh?.new_time ?? (row.appointment_time ?? '').slice(0, 5),
+            reason: row.reason ?? '',
+          } as RequestRow;
+        }),
       ),
     );
   }

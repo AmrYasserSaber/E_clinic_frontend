@@ -176,7 +176,11 @@ export class DoctorScheduleComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (rows) => {
-          this.upcoming.set(this.filterUpcomingFromNowPlusThirty(rows));
+          // Exclude terminal states from upcoming schedule on the client
+          const filtered = rows.filter(
+            (r) => r.status !== 'COMPLETED' && r.status !== 'CANCELLED' && r.status !== 'NO_SHOW',
+          );
+          this.upcoming.set(this.filterUpcomingFromNowPlusThirty(filtered));
           this.loadingUpcoming.set(false);
         },
         error: (err: unknown) => {
