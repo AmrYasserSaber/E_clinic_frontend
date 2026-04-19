@@ -5,8 +5,9 @@ import { finalize } from 'rxjs';
 import { ToastService } from '../../core/toast/toast.service';
 import { SlotsService } from '../../services/slots.service';
 import { AppointmentsService } from '../../services/appointments.service';
-import { DoctorAvailability, Slot } from '../../models/domain.models';
+import { DoctorAvailability, Slot, RescheduleHistoryEntry } from '../../models/domain.models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DatePipe } from '@angular/common';
 
 type CalendarDay = {
   iso: string;
@@ -17,7 +18,7 @@ type CalendarDay = {
 
 @Component({
   standalone: true,
-  imports: [PageHeaderComponent],
+  imports: [PageHeaderComponent, DatePipe],
   template: `
     <div class="mx-auto w-full max-w-6xl space-y-6 pb-24 pt-2">
       <app-page-header
@@ -69,6 +70,37 @@ type CalendarDay = {
             </div>
           </div>
         </section>
+
+        @if (isRescheduleMode && rescheduleHistory.length) {
+          <section class="card-surface rounded-4xl p-6 sm:p-8 lg:col-span-12">
+            <div class="space-y-2">
+              <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+                Reschedule history
+              </div>
+              @for (entry of rescheduleHistory; track entry.changedAt) {
+                <div class="rounded-3xl bg-surface-container-low p-4">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="text-sm font-bold text-on-surface">
+                        {{ entry.oldDate }} {{ entry.oldTime }} → {{ entry.newDate }}
+                        {{ entry.newTime }}
+                      </div>
+                      <div class="text-xs text-on-surface-variant">
+                        By: {{ entry.changedBy || 'Unknown' }} ·
+                        {{ entry.changedAt | date: 'medium' }}
+                      </div>
+                      @if (entry.reason) {
+                        <div class="mt-2 text-xs text-on-surface-variant">
+                          Reason: {{ entry.reason }}
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+        }
 
         @if (isLoadingDoctors) {
           <div class="card-surface rounded-4xl p-8 text-sm text-on-surface-variant">
@@ -246,9 +278,15 @@ type CalendarDay = {
                         class="rounded-3xl bg-surface-container-low px-3 py-2.5 text-sm font-bold text-on-surface transition hover:bg-surface-container active:scale-[0.99]"
                         [class.bg-primary]="selectedSlot?.startTime === slot.startTime"
                         [class.text-white]="selectedSlot?.startTime === slot.startTime"
-                        (click)="selectedSlot = slot"
+                        [class.opacity-40]="isSlotPast(slot) || slot.is_available === false"
+                        [class.cursor-not-allowed]="isSlotPast(slot) || slot.is_available === false"
+                        [disabled]="isSlotPast(slot) || slot.is_available === false"
+                        (click)="selectSlot(slot)"
                       >
                         {{ displayTime(slot.startTime) }}
+                        @if (slot.is_available === false) {
+                          <div class="text-[10px] mt-1 text-on-surface-variant">Booked</div>
+                        }
                       </button>
                     }
                     @if (!morningSlots.length) {
@@ -279,9 +317,15 @@ type CalendarDay = {
                         class="rounded-3xl bg-surface-container-low px-3 py-2.5 text-sm font-bold text-on-surface transition hover:bg-surface-container active:scale-[0.99]"
                         [class.bg-primary]="selectedSlot?.startTime === slot.startTime"
                         [class.text-white]="selectedSlot?.startTime === slot.startTime"
-                        (click)="selectedSlot = slot"
+                        [class.opacity-40]="isSlotPast(slot) || slot.is_available === false"
+                        [class.cursor-not-allowed]="isSlotPast(slot) || slot.is_available === false"
+                        [disabled]="isSlotPast(slot) || slot.is_available === false"
+                        (click)="selectSlot(slot)"
                       >
                         {{ displayTime(slot.startTime) }}
+                        @if (slot.is_available === false) {
+                          <div class="text-[10px] mt-1 text-on-surface-variant">Booked</div>
+                        }
                       </button>
                     }
                     @if (!afternoonSlots.length) {
@@ -351,6 +395,7 @@ export class BookAppointmentPage implements OnInit {
   protected rescheduleAppointmentId: string | null = null;
   protected isLoadingRescheduleInit = false;
   protected selectedDoctor: DoctorAvailability | null = null;
+  protected rescheduleHistory: RescheduleHistoryEntry[] = [];
   protected selectedDate = '';
   protected selectedSlot: Slot | null = null;
   protected slots: Slot[] = [];
@@ -405,11 +450,15 @@ export class BookAppointmentPage implements OnInit {
   }
 
   protected get morningSlots(): Slot[] {
-    return this.slots.filter((slot) => this.slotHour(slot) < 12);
+    return this.slots
+      .filter((slot) => this.slotHour(slot) < 12)
+      .filter((slot) => slot.is_available !== false);
   }
 
   protected get afternoonSlots(): Slot[] {
-    return this.slots.filter((slot) => this.slotHour(slot) >= 12);
+    return this.slots
+      .filter((slot) => this.slotHour(slot) >= 12)
+      .filter((slot) => slot.is_available !== false);
   }
 
   protected selectDoctor(doctor: DoctorAvailability): void {
@@ -452,6 +501,12 @@ export class BookAppointmentPage implements OnInit {
   protected bookSelectedSlot(): void {
     if (!this.selectedDoctor || !this.selectedSlot || !this.selectedDate) return;
 
+    // Client-side guard: prevent booking/rescheduling into a passed slot
+    if (this.isSlotPast(this.selectedSlot)) {
+      this.toast.error('Selected slot has already passed. Please choose another time.');
+      return;
+    }
+
     this.isBooking = true;
     const req =
       this.isRescheduleMode && this.rescheduleAppointmentId
@@ -476,6 +531,18 @@ export class BookAppointmentPage implements OnInit {
         void this.router.navigate(['/patient/appointments']);
       },
       error: (error: HttpErrorResponse) => {
+        // If backend reports a conflict because the slot was taken concurrently,
+        // refresh live availability so the UI stops showing that slot.
+        if (error.status === 409) {
+          this.toast.error(
+            'Selected slot is no longer available. Refreshing availability.',
+            this.isRescheduleMode ? 'Reschedule failed' : 'Booking failed',
+          );
+          this.selectedSlot = null;
+          this.loadSlots();
+          return;
+        }
+
         this.toast.error(
           this.extractErrorMessage(error),
           this.isRescheduleMode ? 'Reschedule failed' : 'Booking failed',
@@ -525,6 +592,7 @@ export class BookAppointmentPage implements OnInit {
             specialty: appt.doctor.specialty?.trim() ? appt.doctor.specialty : undefined,
             status: 'AVAILABLE',
           };
+          this.rescheduleHistory = appt.rescheduleHistory ?? [];
           this.selectedDate = appt.date;
           const [y, m, d] = appt.date.split('-').map((part) => Number(part));
           this.viewMonth = new Date(y, (m || 1) - 1, d || 1);
@@ -570,6 +638,29 @@ export class BookAppointmentPage implements OnInit {
 
   private slotHour(slot: Slot): number {
     return Number(slot.startTime.split(':')[0] || '0');
+  }
+
+  protected selectSlot(slot: Slot): void {
+    if (this.isSlotPast(slot)) return;
+    if (slot.is_available === false) return;
+    this.selectedSlot = slot;
+  }
+
+  protected isSlotPast(slot: Slot): boolean {
+    if (!this.selectedDate) return false;
+    const [year, month, day] = this.selectedDate.split('-').map((p) => Number(p));
+    const [hourStr, minuteStr] = slot.startTime.split(':');
+    const slotDate = new Date(
+      year,
+      (month || 1) - 1,
+      day || 1,
+      Number(hourStr || '0'),
+      Number(minuteStr || '0'),
+    );
+    const now = new Date();
+    const todayIso = this.toIsoDate(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+    if (this.selectedDate !== todayIso) return false;
+    return slotDate.getTime() < now.getTime();
   }
 
   private toIsoDate(date: Date): string {

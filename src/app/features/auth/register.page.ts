@@ -107,7 +107,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       type="text"
                       autocomplete="organization-title"
                       placeholder="e.g. Cardiology"
-                      class="input-ui !pl-11 !pr-4 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                   @if (
@@ -137,7 +137,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       type="text"
                       autocomplete="given-name"
                       placeholder="e.g. Alex"
-                      class="input-ui !pl-11 !pr-4 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </div>
@@ -160,7 +160,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       type="text"
                       autocomplete="family-name"
                       placeholder="e.g. Rivera"
-                      class="input-ui !pl-11 !pr-4 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </div>
@@ -181,7 +181,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                     type="email"
                     autocomplete="email"
                     placeholder="name@example.com"
-                    class="input-ui !pl-11 !pr-4 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                    class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -202,7 +202,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       type="tel"
                       autocomplete="tel"
                       placeholder="+20 100 123 4567"
-                      class="input-ui !pl-11 !pr-4 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </div>
@@ -220,7 +220,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                       id="reg-dob"
                       formControlName="date_of_birth"
                       type="date"
-                      class="input-ui !pl-11 !pr-4 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                      class="input-ui pl-11 pr-4 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                   @if (
@@ -247,7 +247,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                     [type]="showPassword() ? 'text' : 'password'"
                     autocomplete="new-password"
                     placeholder="At least 8 characters"
-                    class="input-ui !pl-11 !pr-11 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                    class="input-ui pl-11 pr-11 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                   />
                   <button
                     type="button"
@@ -303,7 +303,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
                     [type]="showConfirmPassword() ? 'text' : 'password'"
                     autocomplete="new-password"
                     placeholder="Repeat password"
-                    class="input-ui !pl-11 !pr-11 !py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
+                    class="input-ui pl-11 pr-11 py-3 placeholder:text-outline-variant/60 focus:ring-2 focus:ring-primary/20"
                   />
                   <button
                     type="button"

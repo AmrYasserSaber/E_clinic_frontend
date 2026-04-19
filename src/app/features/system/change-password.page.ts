@@ -1,13 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../core/toast/toast.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 
 @Component({
   standalone: true,
-  imports: [ReactiveFormsModule, PageHeaderComponent, RouterLink],
+  imports: [ReactiveFormsModule, PageHeaderComponent],
   template: `
     <app-page-header title="Change Password" subtitle="Update your account password." />
 
@@ -161,7 +160,6 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
               <span>Change Password</span>
             }
           </button>
-          <a routerLink="/settings" class="btn-secondary">Cancel</a>
         </div>
       </form>
     </div>

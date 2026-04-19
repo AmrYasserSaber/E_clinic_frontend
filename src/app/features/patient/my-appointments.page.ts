@@ -277,7 +277,7 @@ export class MyAppointmentsPage implements OnInit {
   protected statusLabel(status: AppointmentStatus): string {
     switch (status) {
       case 'REQUESTED':
-        return 'Pending';
+        return 'Requested';
       case 'CONFIRMED':
         return 'Confirmed';
       case 'CHECKED_IN':

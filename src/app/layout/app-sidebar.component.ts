@@ -133,12 +133,6 @@ const NAV_ITEMS: readonly NavItem[] = [
     href: '/admin/patients',
     isVisible: (role) => role === 'admin',
   },
-  {
-    label: 'Settings',
-    icon: 'settings',
-    href: '/settings',
-    isVisible: () => true,
-  },
 ];
 
 @Component({
